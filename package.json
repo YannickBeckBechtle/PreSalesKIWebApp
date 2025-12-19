@@ -1,17 +1,25 @@
 {
-  "name": "presales-ki-angebot",
+  "name": "presales-foundry-backend",
   "version": "1.0.0",
-  "description": "Presales KI Angebotsunterstützung - Express static app for Azure Web App deployment",
-  "main": "server.js",
+  "private": true,
+  "type": "module",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
+    "@azure/identity": "^4.2.1",
+    "@azure/keyvault-secrets": "^4.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "node-fetch": "^3.3.2",
+    "pino": "^9.4.0",
+    "pino-http": "^10.4.0",
+    "uuid": "^9.0.1"
   },
   "engines": {
     "node": ">=18"

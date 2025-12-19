@@ -1,0 +1,26 @@
+{
+  "app": {
+    "deploymentLabel": "default",
+    "port": 8080,
+    "requestTimeoutMs": 60000,
+    "demoModeDefault": false
+  },
+  "cors": {
+    "allowedOrigins": ""
+  },
+  "azure": {
+    "keyVaultUri": ""
+  },
+  "foundry": {
+    "endpoint": "",
+    "chatPath": "/v1/chat/completions",
+    "modelOrDeployment": "",
+    "apiKeyHeader": "api-key",
+    "extraHeaders": ""
+  },
+  "powerAutomate": {
+    "enabled": false,
+    "triggerUrl": "",
+    "authHeaderName": "x-flow-key"
+  }
+}

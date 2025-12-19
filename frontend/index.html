@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presales KI – Angebotsunterstützung</title>
+  <style>
+    :root{
+      --bg0:#0b1020;
+      --bg1:#0f172a;
+      --card: rgba(255,255,255,.05);
+      --card2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.10);
+      --text:#e5e7eb;
+      --muted:#a7b0c0;
+      --primary:#7c3aed;
+      --primary2:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --surface-panel: rgba(9,14,28,.9);
+      --surface-panel-hover: rgba(255,255,255,.03);
+      --surface-panel-border: rgba(255,255,255,.08);
+      --surface-panel-border-strong: rgba(255,255,255,.14);
+      --input-bg: rgba(255,255,255,.03);
+      --input-bg-focus: rgba(255,255,255,.05);
+      --input-border: rgba(255,255,255,.12);
+      --input-border-focus: rgba(124,58,237,.5);
+      --select-bg: #111522;
+      --select-border: rgba(255,255,255,.06);
+      --select-hover: rgba(255,255,255,.06);
+      --select-active: rgba(120,90,255,.25);
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 8% 10%, rgba(124,58,237,.35), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(34,197,94,.22), transparent 55%),
+        radial-gradient(900px 700px at 40% 110%, rgba(59,130,246,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100vh;
+    }
+    a{color:inherit}
+    .page{max-width:1200px;margin:0 auto;padding:26px 18px 42px}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      margin-bottom:18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.8));
+      box-shadow: 0 16px 40px rgba(124,58,237,.25);
+      position:relative;
+    }
+    .logo:after{
+      content:"";
+      position:absolute;inset:10px;
+      border-radius:12px;
+      background: rgba(15,23,42,.35);
+      border:1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
+    }
+    h1{margin:0;font-size:22px;letter-spacing:.2px}
+    .subtitle{margin:2px 0 0;color:var(--muted);font-size:13px}
+    .pillbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid transparent;
+      background: rgba(255,255,255,.03);
+      display:flex;align-items:center;gap:8px;
+      box-shadow:none;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35)}
+    .dot.ok{background:rgba(34,197,94,.9)}
+    .dot.warn{background:rgba(245,158,11,.9)}
+    .dot.bad{background:rgba(239,68,68,.9)}
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      .pillbar{justify-content:flex-start}
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+    }
+    .card-h{
+      padding:16px 16px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+    }
+    .card-h h2{margin:0;font-size:16px}
+    .card-h p{margin:4px 0 0;color:var(--muted);font-size:12.5px;line-height:1.35}
+    .card-b{padding:16px}
+
+    label{
+      display:flex;align-items:center;gap:8px;
+      font-size:12.5px;color:var(--muted);
+      margin:0 0 6px;
+    }
+    .tip-icon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:18px;height:18px;
+      border-radius:999px;
+      border:1px solid var(--surface-panel-border);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.85);
+      font-size:12px;
+      cursor:pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+      flex:0 0 auto;
+    }
+    .tip-icon:hover, .tip-icon:focus{
+      outline:none;
+      background: rgba(255,255,255,.08);
+      border-color: var(--surface-panel-border-strong);
+      color: #fff;
+    }
+
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius: 14px;
+      border:1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 14px;
+      outline:none;
+      transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    textarea{min-height: 112px; resize: vertical}
+    input:focus, select:focus, textarea:focus{
+      border-color: var(--input-border-focus);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.16);
+      background: var(--input-bg-focus);
+    }
+
+    /* Custom select */
+    .select{
+      position:relative;
+    }
+    .select-button{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:11px 12px;
+      border-radius:14px;
+      background: var(--select-bg);
+      border:1px solid transparent;
+      color: var(--text);
+      cursor:pointer;
+      font-size:14px;
+      transition: border-color .12s ease, background .12s ease, box-shadow .12s ease;
+    }
+    .select-button:hover{
+      background: var(--select-hover);
+      border-color: var(--select-border);
+    }
+    .select-button:focus{
+      outline:none;
+      border-color: var(--input-border-focus);
+      box-shadow: 0 0 0 2px rgba(124,58,237,.12);
+    }
+    .select-caret{
+      font-size:12px;
+      color: var(--muted);
+    }
+    .select-popover{
+      position:absolute;
+      z-index:900;
+      top:calc(100% + 6px);
+      left:0;
+      right:0;
+      background: #151821;
+      border:1px solid var(--select-border);
+      border-radius:12px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
+      padding:6px;
+      display:none;
+    }
+    .select-popover.open{display:block;}
+    .select-options{
+      list-style:none;
+      margin:0;
+      padding:0;
+      max-height:220px;
+      overflow:auto;
+    }
+    .select-option{
+      padding:10px 10px;
+      border-radius:10px;
+      color: var(--text);
+      cursor:pointer;
+      transition: background .12s ease, color .12s ease;
+    }
+    .select-option:hover,
+    .select-option[aria-selected="true"]{
+      background: var(--select-hover);
+    }
+    .select-option.active{
+      background: var(--select-active);
+      border:1px solid rgba(124,58,237,.18);
+    }
+
+    .grid2{display:grid;grid-template-columns: 1fr 1fr;gap:12px}
+    @media (max-width: 520px){ .grid2{grid-template-columns:1fr} }
+
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .field{margin-bottom:12px}
+
+    .btnbar{display:flex;gap:10px;align-items:center;margin-top:6px}
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor:pointer;
+      font-weight: 700;
+      font-size: 13.5px;
+      letter-spacing: .2px;
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      transition: transform .08s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease;
+      user-select:none;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn-primary{
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(124,58,237,.55));
+      color:white;
+      box-shadow: 0 16px 40px rgba(124,58,237,.22);
+      flex: 1 1 auto;
+    }
+    .btn-primary:hover{background: linear-gradient(135deg, rgba(124,58,237,1), rgba(34,197,94,.55))}
+    .btn-ghost{
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+    }
+    .btn-ghost:hover{background: rgba(255,255,255,.06)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    .spinner{
+      width:16px;height:16px;border-radius:999px;
+      border:2px solid rgba(255,255,255,.28);
+      border-top-color: rgba(255,255,255,.9);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .tabs{display:flex;gap:8px;margin: 0 0 10px}
+    .tab-btn{
+      flex:1;
+      padding: 10px 11px;
+      border-radius: 14px;
+      border:1px solid transparent;
+      background: rgba(255,255,255,.02);
+      color: rgba(255,255,255,.82);
+      cursor:pointer;
+      font-weight: 700;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .tab-btn.active{
+      background: linear-gradient(180deg, rgba(124,58,237,.14), rgba(124,58,237,.04));
+      border-color: rgba(124,58,237,.18);
+      color: rgba(255,255,255,.94);
+    }
+    .tab-btn:hover{
+      background: rgba(255,255,255,.04);
+      border-color: var(--surface-panel-border-strong);
+    }
+    .panel{
+      border-radius: var(--radius);
+      border:1px solid var(--surface-panel-border);
+      background: var(--surface-panel);
+      padding:14px;
+      min-height: 170px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .panel.mono{font-family: var(--mono); font-size: 12.8px}
+    .panel.hidden{display:none}
+    .panel:hover{
+      background: linear-gradient(180deg, var(--surface-panel), var(--surface-panel-hover));
+      border-color: var(--surface-panel-border-strong);
+    }
+    .tooltip-bubble{
+      position:absolute;
+      z-index:1000;
+      max-width:320px;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--surface-panel-border-strong);
+      background: rgba(8,12,24,.96);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      color: var(--text);
+      font-size:12.8px;
+      line-height:1.5;
+      pointer-events:none;
+      opacity:0;
+      transform: translateY(-4px);
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .tooltip-bubble.show{
+      opacity:1;
+      transform: translateY(0);
+    }
+    .tooltip-bubble ul{padding-left:16px;margin:6px 0 0;}
+    .tooltip-bubble li{margin:2px 0;}
+
+    /* Details/accordion fallback if used */
+    details{
+      background: var(--surface-panel);
+      border:1px solid var(--surface-panel-border);
+      border-radius: var(--radius-sm);
+      padding:10px 12px;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    details[open]{border-color: var(--surface-panel-border-strong); background: linear-gradient(180deg, var(--surface-panel), var(--surface-panel-hover));}
+    details summary{cursor:pointer; color: var(--text); font-weight: 700; outline:none;}
+    details summary:hover{color: #fff;}
+
+    .eval{
+      margin-top:12px;
+      border-radius: var(--radius);
+      border:1px dashed rgba(255,255,255,.22);
+      background: rgba(255,255,255,.02);
+      padding:12px;
+    }
+    .radio-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;font-size:13px}
+    .radio-row label{margin:0;color:rgba(255,255,255,.9);font-size:13px}
+    .radio-row input{accent-color: var(--primary)}
+    .notice{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(34,197,94,.35);
+      background: rgba(34,197,94,.10);
+      color: rgba(240,253,244,.95);
+      display:none;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .notice.show{display:block}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}
+    th{color:rgba(255,255,255,.65);font-weight:800;font-size:12px;letter-spacing:.2px}
+    tr:hover td{background: rgba(255,255,255,.03)}
+    .tag{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:4px 10px;border-radius:999px;
+      background: rgba(124,58,237,.16);
+      border:1px solid rgba(124,58,237,.25);
+      font-weight:800;font-size:12px;
+    }
+    .rating{font-size: 16px}
+    .small{color:var(--muted);font-size:12px}
+    .foot{
+      margin-top:12px;
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .kbd{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.85);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Presales KI – Angebotsunterstützung</h1>
+          <div class="subtitle">Single-Page UI · Azure AI Foundry Proxy über Backend (Key Vault)</div>
+        </div>
+      </div>
+
+      <div class="pillbar" aria-label="Statusleiste">
+        <div class="pill" title="API-Status (aus /api/health)">
+          <span class="dot" id="apiDot"></span>
+          <span>API: <span id="apiStatus">unbekannt</span></span>
+        </div>
+        <div class="pill" title="Letzter Lauf / Request-ID">
+          <span class="dot"></span>
+          <span>Run: <span id="runId" class="kbd">—</span></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card" aria-labelledby="card-input-title">
+        <div class="card-h">
+          <div>
+            <h2 id="card-input-title">Eingabe / Angebotskontext</h2>
+            <p>Strukturiere die Eingangsdaten, damit das Modell einen belastbaren Angebotsentwurf erzeugt.</p>
+          </div>
+          <div class="small" title="Pflichtfelder zuerst">🧩</div>
+        </div>
+
+        <div class="card-b">
+          <div class="grid2">
+            <div class="field">
+              <label for="customer" data-tip-key="customer">Kunde / Projekt <span class="tip-icon" tabindex="0" data-tip-key="customer" aria-label="Hinweis zu Kunde / Projekt">i</span></label>
+              <input id="customer" type="text" placeholder="z. B. ACME GmbH" />
+            </div>
+
+            <div class="field">
+              <label for="categorySelect" data-tip-key="category">Angebotskategorie <span class="tip-icon" tabindex="0" data-tip-key="category" aria-label="Hinweis zu Angebotskategorie">i</span></label>
+              <div class="select" id="categorySelectWrapper">
+                <button id="categorySelect" class="select-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span id="categoryLabel">Security</span>
+                  <span class="select-caret">▾</span>
+                </button>
+                <div class="select-popover" id="categoryPopover">
+                  <ul class="select-options" role="listbox" aria-label="Angebotskategorie" id="categoryOptions"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="primaryGoal" data-tip-key="primaryGoal">Primäres Ziel <span class="tip-icon" tabindex="0" data-tip-key="primaryGoal" aria-label="Hinweis zu Primäres Ziel">i</span></label>
+            <input id="primaryGoal" type="text" placeholder="z. B. Absicherung von Cloud-Workloads" />
+          </div>
+
+          <div class="field">
+            <label for="secondaryGoals" data-tip-key="secondaryGoals">Sekundäre Ziele <span class="tip-icon" tabindex="0" data-tip-key="secondaryGoals" aria-label="Hinweis zu Sekundäre Ziele">i</span></label>
+            <input id="secondaryGoals" type="text" placeholder="z. B. Kostenoptimierung, Compliance" />
+          </div>
+
+          <div class="field">
+            <label for="situation" data-tip-key="situation">Kundensituation <span class="tip-icon" tabindex="0" data-tip-key="situation" aria-label="Hinweis zu Kundensituation">i</span></label>
+            <textarea id="situation" placeholder="Aktuelle IT-Landschaft, Herausforderungen, Stakeholder …"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="scope" data-tip-key="scope">Leistungsumfang (Stichpunkte) <span class="tip-icon" tabindex="0" data-tip-key="scope" aria-label="Hinweis zu Leistungsumfang">i</span></label>
+            <textarea id="scope" placeholder="Workshops, Architektur-Review, Umsetzung, Betrieb …"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="pt">PT (optional)</label>
+            <input id="pt" type="number" min="0" step="0.5" placeholder="z. B. 12.5" />
+          </div>
+
+          <div class="field">
+            <label for="detailDescription" data-tip-key="detailDescription">Detailbeschreibung (wichtig) <span class="tip-icon" tabindex="0" data-tip-key="detailDescription" aria-label="Hinweis zu Detailbeschreibung">i</span></label>
+            <textarea id="detailDescription" placeholder="Randbedingungen, SLAs, Technologien, Zeitplan …"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="notes" data-tip-key="notes">Weitere Hinweise (optional) <span class="tip-icon" tabindex="0" data-tip-key="notes" aria-label="Hinweis zu Weitere Hinweise">i</span></label>
+            <textarea id="notes" placeholder="Zusätzliche Infos, Abhängigkeiten, Risiken …"></textarea>
+          </div>
+
+          <div class="btnbar">
+            <button id="generateBtn" class="btn btn-primary" type="button">
+              <span id="genIcon">✨</span>
+              <span>Angebot generieren</span>
+            </button>
+            <button id="resetBtn" class="btn btn-ghost" type="button" title="Felder zurücksetzen">↺</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="card-output-title">
+        <div class="card-h">
+          <div>
+            <h2 id="card-output-title">Generiertes Angebot</h2>
+            <p>Ausgabe wird aus der API geladen und als Text/JSON dargestellt.</p>
+          </div>
+          <div class="small" title="Ausgabequelle: /api/generate-offer">🔌</div>
+        </div>
+
+        <div class="card-b">
+          <div class="tabs" role="tablist" aria-label="Ausgabe-Ansichten">
+            <button class="tab-btn active" data-tab="text" role="tab" aria-selected="true">Text</button>
+            <button class="tab-btn" data-tab="json" role="tab" aria-selected="false">JSON</button>
+          </div>
+
+          <div id="panel-text" class="panel" role="tabpanel">Noch kein Angebot generiert.</div>
+          <div id="panel-json" class="panel mono hidden" role="tabpanel">{}</div>
+
+          <div class="eval">
+            <div class="radio-row" aria-label="Rating">
+              <label><input type="radio" name="rating" value="good"> 👍 gut</label>
+              <label><input type="radio" name="rating" value="ok"> 👌 teilweise passend</label>
+              <label><input type="radio" name="rating" value="bad"> 👎 ungeeignet</label>
+            </div>
+
+            <div class="field" style="margin-bottom:10px;">
+              <label for="feedbackText">Kommentar / Annotation</label>
+              <textarea id="feedbackText" placeholder="Warum (nicht) passend? Hinweise für Feinjustierung …"></textarea>
+            </div>
+
+            <div class="btnbar">
+              <button id="saveFeedback" class="btn btn-ghost" type="button">Feedback speichern</button>
+              <button id="copyRun" class="btn btn-ghost" type="button" title="JSON des Runs kopieren">⧉ Run kopieren</button>
+            </div>
+
+            <div id="feedbackNotice" class="notice">Feedback gespeichert</div>
+          </div>
+
+          <div class="foot">
+            Hinweis: API-Key wird <b>nicht</b> im Browser gehalten. Der Backend-Proxy holt ihn aus Azure Key Vault.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="card" style="margin-top:16px" aria-labelledby="card-history-title">
+      <div class="card-h">
+        <div>
+          <h2 id="card-history-title">Historie der Läufe</h2>
+          <p>Letzte Runs aus dem Backend (aktuell In-Memory, optional später DB).</p>
+        </div>
+        <button id="refreshHistory" class="btn btn-ghost" type="button" title="Historie laden">⟳</button>
+      </div>
+      <div class="card-b" style="padding-top:12px">
+        <table>
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Kunde</th>
+              <th>Kategorie</th>
+              <th>Rating</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr>
+              <td colspan="5" class="small">Noch keine Historie geladen.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="foot">
+          Erwartete Endpoints: <span class="kbd">GET /api/health</span>, <span class="kbd">POST /api/generate-offer</span>, <span class="kbd">POST /api/feedback</span>, <span class="kbd">GET /api/history</span>.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="./tooltips.js"></script>
+  <script>
+    const APP_CONFIG = window.APP_CONFIG || {};
+    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || "").replace(/\/$/, "");
+
+    const apiUrl = (path) => `${API_BASE_URL}${path}`;
+
+    const CATEGORY_OPTIONS = [
+      "Security",
+      "Modern Workplace",
+      "Cloud Migration",
+      "Managed Services",
+      "Beratung / Workshops",
+      "Sonstiges"
+    ];
+
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const panels = {
+      text: document.getElementById("panel-text"),
+      json: document.getElementById("panel-json")
+    };
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-selected","false"); });
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected","true");
+        Object.keys(panels).forEach(key => {
+          panels[key].classList.toggle("hidden", key !== btn.dataset.tab);
+        });
+      });
+    });
+
+    const $ = (id) => document.getElementById(id);
+    const apiStatus = $("apiStatus");
+    const apiDot = $("apiDot");
+    const runIdEl = $("runId");
+    const generateBtn = $("generateBtn");
+    const genIcon = $("genIcon");
+    const feedbackNotice = $("feedbackNotice");
+
+    let lastRun = null;
+    let lastContext = null;
+    let categoryValue = CATEGORY_OPTIONS[0];
+    let categoryIndex = 0;
+
+    function setLoading(isLoading){
+      if(isLoading){
+        generateBtn.disabled = true;
+        genIcon.innerHTML = '<span class="spinner" aria-hidden="true"></span>';
+      }else{
+        generateBtn.disabled = false;
+        genIcon.textContent = "✨";
+      }
+    }
+
+    function toRatingEmoji(value){
+      if(value === "good") return "👍";
+      if(value === "ok") return "👌";
+      if(value === "bad") return "👎";
+      return "—";
+    }
+
+    function nowDE(){
+      const d = new Date();
+      return d.toLocaleString("de-DE", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }
+
+    async function safeFetch(url, options){
+      const res = await fetch(url, options);
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (e) { data = { raw: text }; }
+      if(!res.ok){
+        const msg = data?.error || data?.message || ("HTTP " + res.status);
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function renderRun(run){
+      lastRun = run;
+
+      runIdEl.textContent = run?.runId || "—";
+
+      panels.text.textContent = run?.text || "—";
+      panels.json.textContent = JSON.stringify(run || {}, null, 2);
+    }
+
+    function collectContext(){
+      return {
+        customer: $("customer").value?.trim() || "",
+        category: categoryValue,
+        primaryGoal: $("primaryGoal").value?.trim() || "",
+        secondaryGoals: $("secondaryGoals").value?.trim() || "",
+        situation: $("situation").value?.trim() || "",
+        scope: $("scope").value?.trim() || "",
+        pt: $("pt").value ? Number($("pt").value) : null,
+        detailDescription: $("detailDescription").value?.trim() || "",
+        notes: $("notes").value?.trim() || "",
+        language: "de"
+      };
+    }
+
+    function setApiStatus(text, tone){
+      apiStatus.textContent = text;
+      apiDot.classList.remove("ok", "warn", "bad");
+      if(tone === "ok") apiDot.classList.add("ok");
+      if(tone === "warn") apiDot.classList.add("warn");
+      if(tone === "bad") apiDot.classList.add("bad");
+    }
+
+    async function checkHealth(){
+      try{
+        const data = await safeFetch(apiUrl("/api/health"), { method: "GET" });
+        const apiText = data?.api || "online";
+        const tone = apiText.toLowerCase().includes("offline") ? "warn" : "ok";
+        setApiStatus(apiText, tone);
+        if(runIdEl.textContent === "—" && data?.run){
+          runIdEl.textContent = data.run;
+        }
+      }catch(e){
+        setApiStatus("offline (Demo-Modus)", "warn");
+      }
+    }
+
+    generateBtn.addEventListener("click", async () => {
+      const ctx = collectContext();
+      lastContext = ctx;
+
+      if(!ctx.primaryGoal && !ctx.situation && !ctx.detailDescription){
+        panels.text.textContent = "Bitte mindestens „Primäres Ziel“, „Kundensituation“ oder „Detailbeschreibung“ ausfüllen.";
+        return;
+      }
+
+      setLoading(true);
+      feedbackNotice.classList.remove("show");
+
+      try{
+        const payload = {
+          context: ctx,
+          meta: {
+            clientTime: new Date().toISOString(),
+            uiVersion: "v3"
+          }
+        };
+
+        const run = await safeFetch(apiUrl("/api/generate-offer"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        renderRun(run);
+        checkHealth();
+      }catch(err){
+        const demo = {
+          runId: "demo-" + Math.random().toString(16).slice(2, 8),
+          status: "failed",
+          mode: "demo",
+          deployment: "demo",
+          text: [
+            "DEMO (kein Backend erreichbar):",
+            "",
+            `Kunde: ${ctx.customer || "—"}`,
+            `Kategorie: ${ctx.category || "—"}`,
+            `Primäres Ziel: ${ctx.primaryGoal || "—"}`,
+            "",
+            "Kundensituation:",
+            ctx.situation || "—",
+            "",
+            "Leistungsumfang:",
+            ctx.scope || "—",
+            "",
+            `Gesamtaufwand (PT): ${ctx.pt ?? "—"}`,
+            "",
+            "Nächste Schritte: Kick-off, Architektur-Review, Angebotsfinalisierung."
+          ].join("\n"),
+          raw: {
+            context: ctx,
+            error: String(err?.message || err)
+          },
+          error: String(err?.message || err),
+          meta: {
+            startedAt: new Date().toISOString(),
+            finishedAt: new Date().toISOString(),
+            durationMs: 0
+          }
+        };
+        renderRun(demo);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    $("resetBtn").addEventListener("click", () => {
+      ["customer","primaryGoal","secondaryGoals","situation","scope","pt","detailDescription","notes","feedbackText"].forEach(id => $(id).value = "");
+      document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+      panels.text.textContent = "Noch kein Angebot generiert.";
+      panels.json.textContent = "{}";
+      runIdEl.textContent = "—";
+      feedbackNotice.classList.remove("show");
+      lastRun = null;
+    });
+
+    $("saveFeedback").addEventListener("click", async () => {
+      const rating = document.querySelector('input[name="rating"]:checked')?.value || null;
+      const comment = $("feedbackText").value?.trim() || "";
+
+      const payload = {
+        runId: lastRun?.runId || null,
+        rating,
+        comment,
+        context: lastRun?.context || lastContext || collectContext(),
+        clientTime: new Date().toISOString()
+      };
+
+      try{
+        await safeFetch(apiUrl("/api/feedback"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        feedbackNotice.textContent = "Feedback gespeichert – danke!";
+      }catch(e){
+        feedbackNotice.textContent = "Feedback lokal gespeichert (Backend nicht erreichbar).";
+        try{
+          const key = "presales_feedback_" + (payload.runId || "noid");
+          localStorage.setItem(key, JSON.stringify(payload));
+        }catch(_){}
+      }
+      feedbackNotice.classList.add("show");
+      setTimeout(() => feedbackNotice.classList.remove("show"), 2200);
+    });
+
+    $("copyRun").addEventListener("click", async () => {
+      if(!lastRun){ return; }
+      const text = JSON.stringify(lastRun, null, 2);
+      try{
+        await navigator.clipboard.writeText(text);
+        feedbackNotice.textContent = "Run (JSON) kopiert.";
+        feedbackNotice.classList.add("show");
+        setTimeout(() => feedbackNotice.classList.remove("show"), 1500);
+      }catch(e){
+        feedbackNotice.textContent = "Kopieren nicht möglich (Browser-Policy).";
+        feedbackNotice.classList.add("show");
+        setTimeout(() => feedbackNotice.classList.remove("show"), 1500);
+      }
+    });
+
+    async function loadHistory(){
+      const body = $("historyBody");
+      body.innerHTML = `<tr><td colspan="5" class="small">Lade Historie …</td></tr>`;
+      try{
+        const data = await safeFetch(apiUrl("/api/history"), { method: "GET" });
+        const items = data?.items || [];
+        if(!Array.isArray(items) || items.length === 0){
+          body.innerHTML = `<tr><td colspan="5" class="small">Keine Historie vorhanden.</td></tr>`;
+          return;
+        }
+
+        body.innerHTML = "";
+        items.slice(0, 20).forEach(item => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${item.startedAt ? new Date(item.startedAt).toLocaleString("de-DE") : "—"}</td>
+            <td>${item.customer || "—"}</td>
+            <td><span class="tag">${item.category || "—"}</span></td>
+            <td class="rating">${toRatingEmoji(item.rating)}</td>
+            <td><button class="btn btn-ghost" type="button" data-open="${item.runId || ""}">Öffnen</button></td>
+          `;
+          body.appendChild(tr);
+        });
+
+        body.querySelectorAll("button[data-open]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-open");
+            if(!id) return;
+            try{
+              const run = await safeFetch(apiUrl(`/api/run/${encodeURIComponent(id)}`), { method: "GET" });
+              renderRun(run);
+              document.querySelector('.tab-btn[data-tab="text"]').click();
+            }catch(e){
+              panels.text.textContent = "Run konnte nicht geladen werden: " + String(e.message || e);
+            }
+          });
+        });
+
+      }catch(e){
+        body.innerHTML = `<tr><td colspan="5" class="small">Historie nicht erreichbar (Backend fehlt). Demo-Einträge werden angezeigt.</td></tr>`;
+        const demo = [
+          { startedAt: nowDE(), customer: "Demo Kunde", category: "Security", rating: "ok", runId: "demo-001" }
+        ];
+        demo.forEach(item => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${item.startedAt}</td>
+            <td>${item.customer}</td>
+            <td><span class="tag">${item.category}</span></td>
+            <td class="rating">${toRatingEmoji(item.rating)}</td>
+            <td><button class="btn btn-ghost" type="button" disabled>Öffnen</button></td>
+          `;
+          body.appendChild(tr);
+        });
+      }
+    }
+
+    $("refreshHistory").addEventListener("click", loadHistory);
+
+    // ---------------------------
+    // Custom select (Kategorie)
+    // ---------------------------
+    (function setupCategorySelect(){
+      const btn = $("categorySelect");
+      const label = $("categoryLabel");
+      const popover = $("categoryPopover");
+      const list = $("categoryOptions");
+
+      function renderOptions(){
+        list.innerHTML = "";
+        CATEGORY_OPTIONS.forEach((opt, idx) => {
+          const li = document.createElement("li");
+          li.className = "select-option" + (idx === categoryIndex ? " active" : "");
+          li.setAttribute("role", "option");
+          li.setAttribute("tabindex", "-1");
+          li.setAttribute("aria-selected", idx === categoryIndex ? "true" : "false");
+          li.dataset.value = opt;
+          li.dataset.index = String(idx);
+          li.textContent = opt;
+          li.addEventListener("click", () => selectValue(idx));
+          li.addEventListener("mouseenter", () => highlight(idx));
+          list.appendChild(li);
+        });
+      }
+
+      function selectValue(idx){
+        categoryIndex = idx;
+        categoryValue = CATEGORY_OPTIONS[idx];
+        label.textContent = categoryValue;
+        renderOptions();
+        close();
+        btn.focus();
+      }
+
+      function highlight(idx){
+        const items = list.querySelectorAll(".select-option");
+        items.forEach((el, i) => {
+          el.classList.toggle("active", i === idx);
+          el.setAttribute("aria-selected", i === idx ? "true" : "false");
+        });
+      }
+
+      function open(){
+        popover.classList.add("open");
+        btn.setAttribute("aria-expanded", "true");
+        highlight(categoryIndex);
+        const active = list.querySelector(".select-option.active");
+        if(active) active.focus();
+        document.addEventListener("mousedown", onOutside);
+      }
+      function close(){
+        popover.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
+        document.removeEventListener("mousedown", onOutside);
+      }
+      function toggle(){ popover.classList.contains("open") ? close() : open(); }
+
+      function onOutside(e){
+        if(!popover.contains(e.target) && !btn.contains(e.target)){
+          close();
+        }
+      }
+
+      function onKeyDown(e){
+        const isOpen = popover.classList.contains("open");
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          toggle();
+        } else if(e.key === "ArrowDown"){
+          e.preventDefault();
+          if(!isOpen){ open(); return; }
+          categoryIndex = (categoryIndex + 1) % CATEGORY_OPTIONS.length;
+          highlight(categoryIndex);
+          focusActive();
+        } else if(e.key === "ArrowUp"){
+          e.preventDefault();
+          if(!isOpen){ open(); return; }
+          categoryIndex = (categoryIndex - 1 + CATEGORY_OPTIONS.length) % CATEGORY_OPTIONS.length;
+          highlight(categoryIndex);
+          focusActive();
+        } else if(e.key === "Escape"){
+          if(isOpen){
+            e.preventDefault();
+            close();
+            btn.focus();
+          }
+        }
+      }
+
+      function focusActive(){
+        const active = list.querySelector(".select-option.active");
+        if(active) active.focus();
+      }
+
+      btn.addEventListener("click", toggle);
+      btn.addEventListener("keydown", onKeyDown);
+      list.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          const idx = Number(document.activeElement.dataset.index || categoryIndex);
+          selectValue(idx);
+        } else if(e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Escape"){
+          onKeyDown(e);
+        }
+      });
+      list.addEventListener("focusout", (e) => {
+        if(!popover.contains(e.relatedTarget) && e.relatedTarget !== btn){
+          close();
+        }
+      });
+
+      renderOptions();
+      label.textContent = categoryValue;
+    })();
+
+    // ---------------------------
+    // Tooltips
+    // ---------------------------
+    (function setupTooltips(){
+      const data = window.TOOLTIPS || {};
+      const bubble = document.createElement("div");
+      bubble.id = "app-tooltip";
+      bubble.className = "tooltip-bubble";
+      document.body.appendChild(bubble);
+
+      let showTimer = null;
+      let hideTimer = null;
+      let currentTarget = null;
+
+      function renderContent(entry){
+        const bullets = Array.isArray(entry.bullets) && entry.bullets.length
+          ? `<ul>${entry.bullets.map(b => `<li>${b}</li>`).join("")}</ul>`
+          : "";
+        bubble.innerHTML = `<div class="tooltip-text">${entry.text || ""}</div>${bullets}`;
+      }
+
+      function positionBubble(target){
+        const rect = target.getBoundingClientRect();
+        const top = rect.top + window.scrollY + rect.height + 8;
+        const left = rect.left + window.scrollX;
+        bubble.style.top = `${top}px`;
+        bubble.style.left = `${left}px`;
+      }
+
+      function show(target){
+        const key = target.dataset.tipKey;
+        const entry = key ? data[key] : null;
+        if(!entry) return;
+        if(hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+        if(showTimer) clearTimeout(showTimer);
+        showTimer = setTimeout(() => {
+          renderContent(entry);
+          positionBubble(target);
+          bubble.classList.add("show");
+          target.setAttribute("aria-describedby", "app-tooltip");
+          currentTarget = target;
+        }, 150);
+      }
+
+      function hide(){
+        if(showTimer){ clearTimeout(showTimer); showTimer = null; }
+        if(hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          bubble.classList.remove("show");
+          bubble.style.top = "-9999px";
+          bubble.style.left = "-9999px";
+          if(currentTarget){
+            currentTarget.removeAttribute("aria-describedby");
+            currentTarget = null;
+          }
+        }, 100);
+      }
+
+      document.querySelectorAll("[data-tip-key]").forEach(el => {
+        el.addEventListener("mouseenter", () => show(el));
+        el.addEventListener("focus", () => show(el));
+        el.addEventListener("mouseleave", hide);
+        el.addEventListener("blur", hide);
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape"){
+          hide();
+        }
+      });
+    })();
+
+    checkHealth();
+    loadHistory();
+  </script>
+</body>
+</html>
