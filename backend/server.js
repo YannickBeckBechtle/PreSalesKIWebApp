@@ -10,10 +10,9 @@ import { fileURLToPath } from "url";
 dotenv.config();
 
 const PORT = Number(process.env.PORT) || 8080;
-const AZURE_OPENAI_ENDPOINT = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/$/, "");
-const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY || "";
-const AZURE_OPENAI_API_VERSION = process.env.AZURE_OPENAI_API_VERSION || "";
-const AZURE_OPENAI_ASSISTANT_ID = process.env.AZURE_OPENAI_ASSISTANT_ID || "";
+const FLOW_URL = (process.env.POWER_AUTOMATE_TRIGGER_URL || "").trim();
+const FLOW_KEY = (process.env.POWER_AUTOMATE_KEY || "").trim();
+const FLOW_AUTH_HEADER = (process.env.POWER_AUTOMATE_AUTH_HEADER_NAME || "x-flow-key").trim();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(__dirname, "..", "frontend");
@@ -25,107 +24,62 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan("tiny"));
 app.use(cors());
 
-function normalizeContext(body) {
-  if (body && typeof body === "object" && !Array.isArray(body)) {
-    if (body.context && typeof body.context === "object" && !Array.isArray(body.context)) {
-      return body.context;
-    }
-    return body;
-  }
-  return {};
+function toNumber(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }
 
-function buildUserMessage(body) {
-  const pretty = JSON.stringify(body || {}, null, 2);
-  return `Erstelle einen Angebotsentwurf auf Deutsch. Verwende die folgenden Eingangsdaten als JSON:\n${pretty}`;
-}
+function mapToFlowSchema(body) {
+  const looksLikeFlow =
+    body &&
+    typeof body === "object" &&
+    body.customer &&
+    body.offer &&
+    body.goals &&
+    body.context;
+  if (looksLikeFlow) return body;
 
-async function createRun(message) {
-  const url = `${AZURE_OPENAI_ENDPOINT}/openai/threads/runs?api-version=${encodeURIComponent(AZURE_OPENAI_API_VERSION)}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": AZURE_OPENAI_API_KEY
+  const ctx = body?.context && typeof body.context === "object" ? body.context : body || {};
+  return {
+    customer: {
+      companyOrProject: ctx.customer || ctx.companyOrProject || ctx.company || ctx.client || "",
+      responsiblePerson: ctx.responsiblePerson || "",
+      contactPerson: ctx.contactPerson || ""
     },
-    body: JSON.stringify({
-      assistant_id: AZURE_OPENAI_ASSISTANT_ID,
-      thread: { messages: [{ role: "user", content: message }] }
-    })
-  });
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!res.ok) {
-    const msg = data?.error?.message || data?.error || res.statusText;
-    const err = new Error(msg);
-    err.raw = data || text;
-    throw err;
-  }
-  return data;
-}
-
-async function pollRun(threadId, runId, timeoutMs = 60000, intervalMs = 1500) {
-  const url = `${AZURE_OPENAI_ENDPOINT}/openai/threads/${encodeURIComponent(threadId)}/runs/${encodeURIComponent(runId)}?api-version=${encodeURIComponent(AZURE_OPENAI_API_VERSION)}`;
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { "api-key": AZURE_OPENAI_API_KEY }
-    });
-    const text = await res.text();
-    const data = text ? JSON.parse(text) : null;
-    if (!res.ok) {
-      const msg = data?.error?.message || data?.error || res.statusText;
-      const err = new Error(msg);
-      err.raw = data || text;
-      throw err;
+    offer: { primaryCategory: ctx.category || ctx.primaryCategory || "" },
+    goals: { primary: ctx.primaryGoal || "", secondary: ctx.secondaryGoals || "" },
+    context: {
+      customerSituation: ctx.situation || ctx.customerSituation || "",
+      serviceScope: ctx.scope || ctx.serviceScope || "",
+      pt: toNumber(ctx.pt),
+      details: ctx.detailDescription || ctx.details || "",
+      additionalNotes: ctx.notes || ctx.additionalNotes || ""
     }
-    if (data?.status === "completed") return data;
-    if (data?.status && data.status !== "queued" && data.status !== "in_progress") {
-      const err = new Error(`Run status: ${data.status}`);
-      err.raw = data;
-      throw err;
-    }
-    await new Promise(r => setTimeout(r, intervalMs));
-  }
-  const err = new Error("Run polling timed out");
-  err.raw = { threadId, runId };
-  throw err;
+  };
 }
 
-async function fetchMessages(threadId) {
-  const url = `${AZURE_OPENAI_ENDPOINT}/openai/threads/${encodeURIComponent(threadId)}/messages?api-version=${encodeURIComponent(AZURE_OPENAI_API_VERSION)}`;
-  const res = await fetch(url, {
-    method: "GET",
-    headers: { "api-key": AZURE_OPENAI_API_KEY }
-  });
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!res.ok) {
-    const msg = data?.error?.message || data?.error || res.statusText;
-    const err = new Error(msg);
-    err.raw = data || text;
-    throw err;
+function extractTextFromRaw(raw) {
+  if (raw == null) return "";
+  if (typeof raw === "string") return raw;
+  if (typeof raw.text === "string") return raw.text;
+  if (Array.isArray(raw.messages)) {
+    const last = raw.messages[raw.messages.length - 1];
+    if (last && typeof last.text === "string") return last.text;
   }
-  return data;
-}
-
-function extractAssistantText(messages) {
-  const list = Array.isArray(messages?.data) ? messages.data : [];
-  const assistantMsg = list.find(msg => msg?.role === "assistant") || list[list.length - 1];
-  if (!assistantMsg) return "";
-  const contents = assistantMsg.content || [];
-  const firstText = contents.find(c => c.type === "text");
-  return firstText?.text?.value || "";
+  if (Array.isArray(raw?.body?.messages)) {
+    const msgs = raw.body.messages;
+    const last = msgs[msgs.length - 1];
+    if (last?.content?.[0]?.text?.value) return last.content[0].text.value;
+  }
+  return "";
 }
 
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
-    api: "online (Assistant)",
+    api: "online (Power Automate)",
     configured: {
-      assistantId: Boolean(AZURE_OPENAI_ASSISTANT_ID),
-      apiKey: Boolean(AZURE_OPENAI_API_KEY)
+      powerAutomateTriggerUrl: Boolean(FLOW_URL)
     }
   });
 });
@@ -134,39 +88,46 @@ app.post("/api/generate-offer", async (req, res) => {
   const runId = uuidv4();
   const startedAt = new Date().toISOString();
   const startedAtMs = Date.now();
-  const context = normalizeContext(req.body);
   const requestBody = req.body || {};
+  const payload = mapToFlowSchema(requestBody);
   let raw = null;
 
   try {
-    if (!AZURE_OPENAI_ENDPOINT || !AZURE_OPENAI_API_KEY || !AZURE_OPENAI_API_VERSION || !AZURE_OPENAI_ASSISTANT_ID) {
-      return res.status(500).json({ error: "Azure OpenAI Konfiguration fehlt" });
+    if (!FLOW_URL) {
+      return res.status(500).json({ error: "POWER_AUTOMATE_TRIGGER_URL fehlt" });
     }
 
-    const userMessage = buildUserMessage(requestBody);
-    const runCreate = await createRun(userMessage);
-    raw = { runCreate };
+    const headers = { "Content-Type": "application/json" };
+    if (FLOW_KEY) {
+      headers[FLOW_AUTH_HEADER || "x-flow-key"] = FLOW_KEY;
+    }
 
-    const threadId = runCreate?.thread_id;
-    const runObj = await pollRun(threadId, runCreate?.id);
-    raw.run = runObj;
+    const response = await fetch(FLOW_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    });
 
-    const messages = await fetchMessages(threadId);
-    raw.messages = messages;
+    const text = await response.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (_) { data = { raw: text }; }
+    raw = data;
 
-    const text = extractAssistantText(messages);
+    if (!response.ok) {
+      const msg = data?.error || data?.message || `HTTP ${response.status}`;
+      throw new Error(msg);
+    }
 
     const finishedAt = new Date().toISOString();
     const durationMs = Date.now() - startedAtMs;
+    const runText = typeof data?.text === "string" ? data.text : (extractTextFromRaw(data) || text);
 
     return res.json({
       runId,
       status: "succeeded",
-      mode: "agent",
-      request: requestBody,
-      context,
-      text,
-      raw,
+      mode: "powerautomate",
+      text: runText,
+      raw: data,
       meta: { startedAt, finishedAt, durationMs }
     });
   } catch (err) {
@@ -175,11 +136,9 @@ app.post("/api/generate-offer", async (req, res) => {
     return res.status(500).json({
       runId,
       status: "failed",
-      mode: "agent",
+      mode: "powerautomate",
       error: err?.message || String(err),
-      request: requestBody,
-      context,
-      raw: raw || err?.raw || null,
+      raw,
       meta: { startedAt, finishedAt, durationMs }
     });
   }

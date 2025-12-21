@@ -436,7 +436,7 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>Presales KI – Angebotsunterstützung</h1>
-          <div class="subtitle">Single-Page UI · Backend-Proxy auf Azure OpenAI Assistant</div>
+          <div class="subtitle">Single-Page UI · Backend-Proxy auf Power Automate</div>
         </div>
       </div>
 
@@ -575,7 +575,7 @@
           </div>
 
           <div class="foot">
-            Hinweis: API-Key wird <b>nicht</b> im Browser gehalten. Der Backend-Proxy spricht den Azure OpenAI Assistant an.
+            Hinweis: API-Key wird <b>nicht</b> im Browser gehalten. Der Backend-Proxy ruft Power Automate auf.
           </div>
         </div>
       </section>
@@ -698,25 +698,13 @@
       try { return JSON.stringify(data ?? {}, null, 2); } catch (_) { return String(data); }
     }
 
-    function extractText(data){
-      if(data == null) return "";
-      if(typeof data === "string") return data;
-      if(typeof data.text === "string") return data.text;
-      if(typeof data.error === "string") return data.error;
-      if(typeof data.message === "string") return data.message;
-      if(typeof data.body === "string") return data.body;
-      if(typeof data.result === "string") return data.result;
-      if(typeof data.output === "string") return data.output;
-      return "";
-    }
-
     function renderRun(run){
       lastRun = run;
 
       runIdEl.textContent = run?.runId || "—";
 
-      const text = extractText(run);
-      panels.text.textContent = text || "Antwort erhalten (siehe JSON-Tab).";
+      const text = typeof run?.text === "string" ? run.text : "";
+      panels.text.textContent = text || "Keine Antwort erhalten.";
       panels.json.textContent = formatJsonPanel(run);
     }
 
