@@ -83,6 +83,29 @@
       display:flex;align-items:center;gap:8px;
       box-shadow:none;
     }
+    .pill-run{min-width:220px;gap:10px;}
+    .pill-run .run-meta{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+    .pill-run .run-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px}
+    .pill-run .run-line .muted{color:var(--muted);}
+    .pill-run .run-progress{
+      width:100%;
+      height:8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      overflow:hidden;
+    }
+    .pill-run .run-progress div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(34,197,94,.7));
+      transition: width .2s ease;
+    }
+    @media (max-width: 520px){
+      .pill-run{min-width:180px;}
+      .pill-run .run-line .kbd{font-size:11px;padding:1px 6px;}
+      .pill-run .run-progress{height:6px;}
+    }
     .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35)}
     .dot.ok{background:rgba(34,197,94,.9)}
     .dot.warn{background:rgba(245,158,11,.9)}
@@ -445,9 +468,19 @@
           <span class="dot" id="apiDot"></span>
           <span>API: <span id="apiStatus">unbekannt</span></span>
         </div>
-        <div class="pill" title="Letzter Lauf / Request-ID">
-          <span class="dot"></span>
-          <span>Run: <span id="runId" class="kbd">—</span></span>
+        <div class="pill pill-run" title="Letzter Lauf / Fortschritt">
+          <span class="dot" id="runDot"></span>
+          <div class="run-meta">
+            <div class="run-line">
+              <span class="small">Run:</span>
+              <span id="runId" class="kbd">-</span>
+              <span id="runStage" class="small muted">–</span>
+              <span id="runProgressLabel" class="kbd">0%</span>
+            </div>
+            <div class="run-progress">
+              <div id="runProgressBar"></div>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -475,6 +508,14 @@
                 <input id="responsiblePerson" type="text" placeholder="z. B. Max Mustermann" required aria-required="true" autocomplete="name" />
                 <div id="responsiblePersonError" class="error-text" aria-live="polite"></div>
               </div>
+
+              <div class="field">
+                <label for="email" data-tip-key="email">E-Mail <span class="tip-icon" tabindex="0" data-tip-key="email" aria-label="Hinweis zu E-Mail">i</span></label>
+                <input id="email" type="email" placeholder="name@bechtle.com" value="max.bechtle@bechtle.com" required aria-required="true" />
+                <div id="emailError" class="small" style="color: rgba(239,68,68,.95); display:none; margin-top:6px;">
+                  Bitte eine gültige Bechtle-E-Mail (@bechtle.com) eingeben.
+                </div>
+              </div>
             </div>
 
             <div class="field">
@@ -494,11 +535,6 @@
           <div class="field">
             <label for="primaryGoal" data-tip-key="primaryGoal">Primäres Ziel <span class="tip-icon" tabindex="0" data-tip-key="primaryGoal" aria-label="Hinweis zu Primäres Ziel">i</span></label>
             <input id="primaryGoal" type="text" placeholder="z. B. Absicherung von Cloud-Workloads" />
-          </div>
-
-          <div class="field">
-            <label for="secondaryGoals" data-tip-key="secondaryGoals">Sekundäre Ziele <span class="tip-icon" tabindex="0" data-tip-key="secondaryGoals" aria-label="Hinweis zu Sekundäre Ziele">i</span></label>
-            <input id="secondaryGoals" type="text" placeholder="z. B. Kostenoptimierung, Compliance" />
           </div>
 
           <div class="field">
@@ -649,7 +685,11 @@
     const $ = (id) => document.getElementById(id);
     const apiStatus = $("apiStatus");
     const apiDot = $("apiDot");
+    const runDot = $("runDot");
     const runIdEl = $("runId");
+    const runStage = $("runStage");
+    const runProgressBar = $("runProgressBar");
+    const runProgressLabel = $("runProgressLabel");
     const generateBtn = $("generateBtn");
     const genIcon = $("genIcon");
     const feedbackNotice = $("feedbackNotice");
@@ -658,13 +698,16 @@
     let lastContext = null;
     let categoryValue = CATEGORY_OPTIONS[0];
     let categoryIndex = 0;
-
-    function setLoading(isLoading){
+    let progressTimer = null;
+    let progressStartMs = 0;
+    let isLoading = false;
+    function setLoading(state){
+      isLoading = state;
       if(isLoading){
         generateBtn.disabled = true;
         genIcon.innerHTML = '<span class="spinner" aria-hidden="true"></span>';
       }else{
-        generateBtn.disabled = false;
+        generateBtn.disabled = !validateEmail();
         genIcon.textContent = "✨";
       }
     }
@@ -719,10 +762,10 @@
       return {
         companyOrProject: $("customer").value?.trim() || "",
         responsiblePerson: $("responsiblePerson").value?.trim() || "",
+        email: $("email").value?.trim() || "",
         contactPerson: "",
         primaryCategory: categoryValue,
         primaryGoal: $("primaryGoal").value?.trim() || "",
-        secondaryGoals: $("secondaryGoals").value?.trim() || "",
         customerSituation: $("situation").value?.trim() || "",
         serviceScope: $("scope").value?.trim() || "",
         pt: parsePtValue($("pt").value),
@@ -736,10 +779,10 @@
         customer: {
           companyOrProject: values.companyOrProject,
           responsiblePerson: values.responsiblePerson,
-          contactPerson: values.contactPerson || ""
+          contactPerson: values.email || ""
         },
         offer: { primaryCategory: values.primaryCategory },
-        goals: { primary: values.primaryGoal, secondary: values.secondaryGoals },
+        goals: { primary: values.primaryGoal, secondary: "" },
         context: {
           customerSituation: values.customerSituation,
           serviceScope: values.serviceScope,
@@ -773,6 +816,20 @@
       if(msg){ msg.textContent = message; msg.classList.add("show"); }
     }
 
+    function validateEmail(){
+      const val = $("email").value?.trim() || "";
+      const errEl = $("emailError");
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const ok = Boolean(val) && emailRegex.test(val) && val.toLowerCase().endsWith("@bechtle.com");
+      if(ok){
+        errEl.style.display = "none";
+      }else{
+        errEl.style.display = "block";
+      }
+      if(!isLoading){ generateBtn.disabled = !ok; }
+      return ok;
+    }
+
     function validateForm(values){
       clearFieldError("responsiblePerson");
       let ok = true;
@@ -780,6 +837,7 @@
         showFieldError("responsiblePerson", "Bitte Verantwortliche Person angeben.");
         ok = false;
       }
+      if(!validateEmail()){ ok = false; }
       return ok;
     }
 
@@ -789,6 +847,55 @@
       if(tone === "ok") apiDot.classList.add("ok");
       if(tone === "warn") apiDot.classList.add("warn");
       if(tone === "bad") apiDot.classList.add("bad");
+    }
+
+    function setRunTone(tone){
+      runDot.classList.remove("ok", "warn", "bad");
+      if(tone === "ok") runDot.classList.add("ok");
+      if(tone === "warn") runDot.classList.add("warn");
+      if(tone === "bad") runDot.classList.add("bad");
+    }
+
+    function setRunProgress(pct, stageText){
+      const p = Math.max(0, Math.min(100, Math.round(pct)));
+      runProgressBar.style.width = p + "%";
+      runProgressLabel.textContent = p + "%";
+      if(stageText) runStage.textContent = stageText;
+    }
+
+    function stopFakeRunProgress(){
+      if(progressTimer){
+        clearInterval(progressTimer);
+        progressTimer = null;
+      }
+    }
+
+    function startFakeRunProgress(){
+      stopFakeRunProgress();
+      progressStartMs = Date.now();
+      const rampTo70Ms = 120000; // 2 Minuten
+      const ramp70to100Ms = 60000; // 1 Minute
+      const totalMs = rampTo70Ms + ramp70to100Ms;
+
+      setRunProgress(0, "Angebot wird generiert …");
+
+      progressTimer = setInterval(() => {
+        const t = Date.now() - progressStartMs;
+        if (t <= rampTo70Ms){
+          const pct = (t / rampTo70Ms) * 70;
+          setRunProgress(pct, "Angebot wird generiert …");
+          return;
+        }
+
+        const t2 = Math.min(ramp70to100Ms, t - rampTo70Ms);
+        const pct = 70 + (t2 / ramp70to100Ms) * 30;
+        setRunProgress(pct, "Angebot wird zum Versenden vorbereitet …");
+
+        if (t >= totalMs){
+          stopFakeRunProgress();
+          setRunProgress(100, "Angebot wird zum Versenden vorbereitet …");
+        }
+      }, 500);
     }
 
     async function checkHealth(){
@@ -813,6 +920,13 @@
         return;
       }
 
+      if(!validateEmail()){
+        panels.text.textContent = "Bitte E-Mail prüfen (nur @bechtle.com).";
+        panels.json.textContent = JSON.stringify({ status:"invalid_input", field:"email" }, null, 2);
+        setApiStatus("Eingabe prüfen", "warn");
+        return;
+      }
+
       if(!formValues.primaryGoal && !formValues.customerSituation && !formValues.details){
         panels.text.textContent = "Bitte mindestens „Primäres Ziel“, „Kundensituation“ oder „Detailbeschreibung“ ausfüllen.";
         return;
@@ -823,6 +937,13 @@
 
       setLoading(true);
       feedbackNotice.classList.remove("show");
+      setApiStatus("läuft…", "warn");
+      setRunTone("warn");
+      setRunProgress(0, "Angebot wird generiert …");
+      runIdEl.textContent = "local-" + Math.random().toString(16).slice(2, 8);
+      panels.text.textContent = "Bitte warten – Angebot wird generiert …";
+      panels.json.textContent = JSON.stringify({ status: "pending" }, null, 2);
+      startFakeRunProgress();
 
       try{
         const run = await safeFetch(apiUrl("/api/generate-offer"), {
@@ -831,9 +952,16 @@
           body: JSON.stringify(payload)
         });
 
+        stopFakeRunProgress();
+        setRunTone("ok");
+        setRunProgress(100, "Antwort empfangen");
         renderRun(run);
+        setApiStatus("fertig", "ok");
         checkHealth();
       }catch(err){
+        stopFakeRunProgress();
+        setRunTone("bad");
+        setRunProgress(100, "Fehler");
         const errorText = String(err?.message || err);
         const errorObj = {
           status: "failed",
@@ -849,9 +977,16 @@
     });
 
     $("responsiblePerson").addEventListener("input", () => clearFieldError("responsiblePerson"));
+    $("email").addEventListener("input", () => {
+      validateEmail();
+      if(!validateEmail()){
+        setApiStatus("Eingabe prüfen", "warn");
+      }
+    });
 
     $("resetBtn").addEventListener("click", () => {
-      ["customer","responsiblePerson","primaryGoal","secondaryGoals","situation","scope","pt","detailDescription","notes","feedbackText"].forEach(id => $(id).value = "");
+      ["customer","responsiblePerson","primaryGoal","situation","scope","pt","detailDescription","notes","feedbackText"].forEach(id => $(id).value = "");
+      $("email").value = "max.bechtle@bechtle.com";
       document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
       clearFieldError("responsiblePerson");
       panels.text.textContent = "Noch kein Angebot generiert.";
@@ -860,6 +995,9 @@
       feedbackNotice.classList.remove("show");
       lastRun = null;
       lastContext = null;
+      stopFakeRunProgress();
+      setRunTone(null);
+      setRunProgress(0, "–");
     });
 
     $("saveFeedback").addEventListener("click", async () => {
