@@ -436,7 +436,7 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>Presales KI – Angebotsunterstützung</h1>
-          <div class="subtitle">Single-Page UI · Azure AI Foundry Proxy über Backend (Key Vault)</div>
+          <div class="subtitle">Single-Page UI · Backend-Proxy auf Azure OpenAI Assistant</div>
         </div>
       </div>
 
@@ -575,7 +575,7 @@
           </div>
 
           <div class="foot">
-            Hinweis: API-Key wird <b>nicht</b> im Browser gehalten. Der Backend-Proxy holt ihn aus Azure Key Vault.
+            Hinweis: API-Key wird <b>nicht</b> im Browser gehalten. Der Backend-Proxy spricht den Azure OpenAI Assistant an.
           </div>
         </div>
       </section>
@@ -847,24 +847,14 @@
         checkHealth();
       }catch(err){
         const errorText = String(err?.message || err);
-        const demo = {
+        const errorObj = {
           status: "failed",
           error: errorText,
-          text: [
-            "Request fehlgeschlagen oder Flow nicht erreichbar:",
-            errorText,
-            "",
-            `Kunde/Projekt: ${payload.customer.companyOrProject || "—"}`,
-            `Verantwortliche Person: ${payload.customer.responsiblePerson || "—"}`,
-            `Kategorie: ${payload.offer.primaryCategory || "—"}`,
-            `Primäres Ziel: ${payload.goals.primary || "—"}`,
-            `Kundensituation: ${payload.context.customerSituation || "—"}`,
-            `PT: ${payload.context.pt ?? "—"}`
-          ].join("\n"),
           request: payload,
           receivedAt: new Date().toISOString()
         };
-        renderRun(demo);
+        panels.text.textContent = "Request fehlgeschlagen: " + errorText;
+        panels.json.textContent = formatJsonPanel(errorObj);
       } finally {
         setLoading(false);
       }
