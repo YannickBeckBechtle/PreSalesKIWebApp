@@ -102,7 +102,10 @@ app.post("/api/generate-offer", async (req, res) => {
 });
 
 app.use(express.static(frontendDir));
-app.get("/", (_req, res) => res.sendFile(path.join(frontendDir, "index.html")));
+app.get("/", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendFile(path.join(frontendDir, "index.html"));
+});
 app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
 
 app.listen(PORT, () => {
