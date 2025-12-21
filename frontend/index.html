@@ -52,6 +52,7 @@
     header{
       display:flex;align-items:center;justify-content:space-between;gap:16px;
       margin-bottom:18px;
+      flex-wrap:wrap;
     }
     .brand{
       display:flex;align-items:center;gap:12px;
@@ -228,12 +229,25 @@
     }
 
     .grid2{display:grid;grid-template-columns: 1fr 1fr;gap:12px}
-    @media (max-width: 520px){ .grid2{grid-template-columns:1fr} }
+    @media (max-width: 720px){ .grid2{grid-template-columns:1fr} }
+    .stack-vertical{display:flex;flex-direction:column;gap:12px;height:100%}
 
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .field{margin-bottom:12px}
+    .field.error input,
+    .field.error textarea{
+      border-color: var(--bad);
+      box-shadow: 0 0 0 2px rgba(239,68,68,.18);
+    }
+    .error-text{
+      color: var(--bad);
+      font-size: 12px;
+      margin-top: 6px;
+      display:none;
+    }
+    .error-text.show{display:block}
 
-    .btnbar{display:flex;gap:10px;align-items:center;margin-top:6px}
+    .btnbar{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap}
     .btn{
       border:none;
       border-radius: 14px;
@@ -300,8 +314,9 @@
       font-size: 13.5px;
       line-height: 1.55;
       white-space: pre-wrap;
+      overflow-wrap:anywhere;
     }
-    .panel.mono{font-family: var(--mono); font-size: 12.8px}
+    .panel.mono{font-family: var(--mono); font-size: 12.8px; overflow-x:auto; overflow-wrap:anywhere;}
     .panel.hidden{display:none}
     .panel:hover{
       background: linear-gradient(180deg, var(--surface-panel), var(--surface-panel-hover));
@@ -432,9 +447,17 @@
 
         <div class="card-b">
           <div class="grid2">
-            <div class="field">
-              <label for="customer" data-tip-key="customer">Kunde / Projekt <span class="tip-icon" tabindex="0" data-tip-key="customer" aria-label="Hinweis zu Kunde / Projekt">i</span></label>
-              <input id="customer" type="text" placeholder="z. B. ACME GmbH" />
+            <div class="stack-vertical">
+              <div class="field">
+                <label for="customer" data-tip-key="customer">Kunde / Projekt <span class="tip-icon" tabindex="0" data-tip-key="customer" aria-label="Hinweis zu Kunde / Projekt">i</span></label>
+                <input id="customer" type="text" placeholder="z. B. ACME GmbH" />
+              </div>
+
+              <div class="field" data-field="responsiblePerson">
+                <label for="responsiblePerson">Verantwortliche Person (Kunde)</label>
+                <input id="responsiblePerson" type="text" placeholder="z. B. Max Mustermann" required aria-required="true" autocomplete="name" />
+                <div id="responsiblePersonError" class="error-text" aria-live="polite"></div>
+              </div>
             </div>
 
             <div class="field">
@@ -653,28 +676,106 @@
       return data;
     }
 
+    function formatJsonPanel(data){
+      if(typeof data === "string") return data;
+      try { return JSON.stringify(data ?? {}, null, 2); } catch (_) { return String(data); }
+    }
+
+    function extractText(data){
+      if(data == null) return "";
+      if(typeof data === "string") return data;
+      if(typeof data.text === "string") return data.text;
+      if(typeof data.error === "string") return data.error;
+      if(typeof data.message === "string") return data.message;
+      if(typeof data.body === "string") return data.body;
+      if(typeof data.result === "string") return data.result;
+      if(typeof data.output === "string") return data.output;
+      return "";
+    }
+
     function renderRun(run){
       lastRun = run;
 
       runIdEl.textContent = run?.runId || "—";
 
-      panels.text.textContent = run?.text || "—";
-      panels.json.textContent = JSON.stringify(run || {}, null, 2);
+      const text = extractText(run);
+      panels.text.textContent = text || "Antwort erhalten (siehe JSON-Tab).";
+      panels.json.textContent = formatJsonPanel(run);
     }
 
-    function collectContext(){
+    function parsePtValue(raw){
+      if(!raw) return null;
+      const normalized = String(raw).replace(",", ".").trim();
+      const num = Number(normalized);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function collectFormValues(){
       return {
-        customer: $("customer").value?.trim() || "",
-        category: categoryValue,
+        companyOrProject: $("customer").value?.trim() || "",
+        responsiblePerson: $("responsiblePerson").value?.trim() || "",
+        contactPerson: "",
+        primaryCategory: categoryValue,
         primaryGoal: $("primaryGoal").value?.trim() || "",
         secondaryGoals: $("secondaryGoals").value?.trim() || "",
-        situation: $("situation").value?.trim() || "",
-        scope: $("scope").value?.trim() || "",
-        pt: $("pt").value ? Number($("pt").value) : null,
-        detailDescription: $("detailDescription").value?.trim() || "",
-        notes: $("notes").value?.trim() || "",
-        language: "de"
+        customerSituation: $("situation").value?.trim() || "",
+        serviceScope: $("scope").value?.trim() || "",
+        pt: parsePtValue($("pt").value),
+        details: $("detailDescription").value?.trim() || "",
+        additionalNotes: $("notes").value?.trim() || ""
       };
+    }
+
+    function buildFlowPayload(values){
+      return {
+        customer: {
+          companyOrProject: values.companyOrProject,
+          responsiblePerson: values.responsiblePerson,
+          contactPerson: values.contactPerson || ""
+        },
+        offer: { primaryCategory: values.primaryCategory },
+        goals: { primary: values.primaryGoal, secondary: values.secondaryGoals },
+        context: {
+          customerSituation: values.customerSituation,
+          serviceScope: values.serviceScope,
+          pt: values.pt,
+          details: values.details,
+          additionalNotes: values.additionalNotes
+        }
+      };
+    }
+
+    function buildFlowPayloadFromUi(){
+      const values = collectFormValues();
+      const payload = buildFlowPayload(values);
+      return {
+        ...payload,
+        meta: { source: "web", ts: new Date().toISOString() }
+      };
+    }
+
+    function clearFieldError(key){
+      const wrapper = document.querySelector(`[data-field="${key}"]`);
+      if(wrapper){ wrapper.classList.remove("error"); }
+      const msg = document.getElementById(`${key}Error`);
+      if(msg){ msg.textContent = ""; msg.classList.remove("show"); }
+    }
+
+    function showFieldError(key, message){
+      const wrapper = document.querySelector(`[data-field="${key}"]`);
+      if(wrapper){ wrapper.classList.add("error"); }
+      const msg = document.getElementById(`${key}Error`);
+      if(msg){ msg.textContent = message; msg.classList.add("show"); }
+    }
+
+    function validateForm(values){
+      clearFieldError("responsiblePerson");
+      let ok = true;
+      if(!values.responsiblePerson){
+        showFieldError("responsiblePerson", "Bitte Verantwortliche Person angeben.");
+        ok = false;
+      }
+      return ok;
     }
 
     function setApiStatus(text, tone){
@@ -700,26 +801,25 @@
     }
 
     generateBtn.addEventListener("click", async () => {
-      const ctx = collectContext();
-      lastContext = ctx;
+      const formValues = collectFormValues();
 
-      if(!ctx.primaryGoal && !ctx.situation && !ctx.detailDescription){
+      if(!validateForm(formValues)){
+        panels.text.textContent = "Bitte Verantwortliche Person angeben.";
+        return;
+      }
+
+      if(!formValues.primaryGoal && !formValues.customerSituation && !formValues.details){
         panels.text.textContent = "Bitte mindestens „Primäres Ziel“, „Kundensituation“ oder „Detailbeschreibung“ ausfüllen.";
         return;
       }
+
+      const payload = buildFlowPayloadFromUi();
+      lastContext = payload;
 
       setLoading(true);
       feedbackNotice.classList.remove("show");
 
       try{
-        const payload = {
-          context: ctx,
-          meta: {
-            clientTime: new Date().toISOString(),
-            uiVersion: "v3"
-          }
-        };
-
         const run = await safeFetch(apiUrl("/api/generate-offer"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -729,38 +829,23 @@
         renderRun(run);
         checkHealth();
       }catch(err){
+        const errorText = String(err?.message || err);
         const demo = {
-          runId: "demo-" + Math.random().toString(16).slice(2, 8),
           status: "failed",
-          mode: "demo",
-          deployment: "demo",
+          error: errorText,
           text: [
-            "DEMO (kein Backend erreichbar):",
+            "Request fehlgeschlagen oder Flow nicht erreichbar:",
+            errorText,
             "",
-            `Kunde: ${ctx.customer || "—"}`,
-            `Kategorie: ${ctx.category || "—"}`,
-            `Primäres Ziel: ${ctx.primaryGoal || "—"}`,
-            "",
-            "Kundensituation:",
-            ctx.situation || "—",
-            "",
-            "Leistungsumfang:",
-            ctx.scope || "—",
-            "",
-            `Gesamtaufwand (PT): ${ctx.pt ?? "—"}`,
-            "",
-            "Nächste Schritte: Kick-off, Architektur-Review, Angebotsfinalisierung."
+            `Kunde/Projekt: ${payload.customer.companyOrProject || "—"}`,
+            `Verantwortliche Person: ${payload.customer.responsiblePerson || "—"}`,
+            `Kategorie: ${payload.offer.primaryCategory || "—"}`,
+            `Primäres Ziel: ${payload.goals.primary || "—"}`,
+            `Kundensituation: ${payload.context.customerSituation || "—"}`,
+            `PT: ${payload.context.pt ?? "—"}`
           ].join("\n"),
-          raw: {
-            context: ctx,
-            error: String(err?.message || err)
-          },
-          error: String(err?.message || err),
-          meta: {
-            startedAt: new Date().toISOString(),
-            finishedAt: new Date().toISOString(),
-            durationMs: 0
-          }
+          request: payload,
+          receivedAt: new Date().toISOString()
         };
         renderRun(demo);
       } finally {
@@ -768,14 +853,18 @@
       }
     });
 
+    $("responsiblePerson").addEventListener("input", () => clearFieldError("responsiblePerson"));
+
     $("resetBtn").addEventListener("click", () => {
-      ["customer","primaryGoal","secondaryGoals","situation","scope","pt","detailDescription","notes","feedbackText"].forEach(id => $(id).value = "");
+      ["customer","responsiblePerson","primaryGoal","secondaryGoals","situation","scope","pt","detailDescription","notes","feedbackText"].forEach(id => $(id).value = "");
       document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+      clearFieldError("responsiblePerson");
       panels.text.textContent = "Noch kein Angebot generiert.";
       panels.json.textContent = "{}";
       runIdEl.textContent = "—";
       feedbackNotice.classList.remove("show");
       lastRun = null;
+      lastContext = null;
     });
 
     $("saveFeedback").addEventListener("click", async () => {
@@ -786,7 +875,7 @@
         runId: lastRun?.runId || null,
         rating,
         comment,
-        context: lastRun?.context || lastContext || collectContext(),
+        context: lastRun?.request || lastRun?.context || lastContext || buildFlowPayloadFromUi(),
         clientTime: new Date().toISOString()
       };
 

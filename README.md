@@ -61,10 +61,33 @@ Managed Identity benötigt mindestens **Secrets Get** auf Key Vault. Demo-Modus 
 
 ## Endpoints
 - `GET  /api/health`
-- `POST /api/generate-offer`
+- `POST /api/generate-offer-via-flow` (Power Automate Trigger, siehe Payload unten)
+- `POST /api/generate-offer` (Foundry, falls aktiviert)
 - `GET  /api/run/:id`
 - `GET  /api/history`
 - `POST /api/feedback`
+
+## Power Automate Payload (Frontend)
+Das UI sendet beim Klick auf **Angebot generieren** folgendes JSON (Flow-URL/Key bleiben unverändert):
+```json
+{
+  "customer": {
+    "companyOrProject": "string",
+    "responsiblePerson": "string",
+    "contactPerson": "string"
+  },
+  "offer": { "primaryCategory": "string" },
+  "goals": { "primary": "string", "secondary": "string" },
+  "context": {
+    "customerSituation": "string",
+    "serviceScope": "string",
+    "pt": 0,
+    "details": "string",
+    "additionalNotes": "string"
+  }
+}
+```
+Das Pflichtfeld **Verantwortliche Person (Kunde)** befüllt `customer.responsiblePerson`. PT bleibt `null`, wenn leer oder nicht numerisch; Dezimal-Kommas werden in Zahlen umgewandelt.
 
 ## Wie ändere ich Endpoint/Config?
 1. Frontend: `frontend/config.js` anpassen (`API_BASE_URL`)
