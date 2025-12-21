@@ -19,7 +19,21 @@ const frontendDir = path.resolve(__dirname, "..", "frontend");
 const app = express();
 app.disable("x-powered-by");
 app.use(express.json({ limit: "1mb" }));
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"]
+      }
+    }
+  })
+);
+
+
 app.use(morgan("tiny"));
 app.use(cors());
 
