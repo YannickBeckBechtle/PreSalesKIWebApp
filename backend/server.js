@@ -102,11 +102,16 @@ app.post("/api/generate-offer", async (req, res) => {
       headers[FLOW_AUTH_HEADER || "x-flow-key"] = FLOW_KEY;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 240000);
+
     const response = await fetch(FLOW_URL, {
       method: "POST",
       headers,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     const text = await response.text();
     let data = null;

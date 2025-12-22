@@ -88,7 +88,7 @@
     .pill-run .run-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px}
     .pill-run .run-line .muted{color:var(--muted);}
     .pill-run .run-progress{
-      width:100%;
+      width:120px;
       height:8px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
@@ -104,7 +104,7 @@
     @media (max-width: 520px){
       .pill-run{min-width:180px;}
       .pill-run .run-line .kbd{font-size:11px;padding:1px 6px;}
-      .pill-run .run-progress{height:6px;}
+      .pill-run .run-progress{height:6px;width:100px;}
     }
     .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35)}
     .dot.ok{background:rgba(34,197,94,.9)}
@@ -269,6 +269,15 @@
       display:none;
     }
     .error-text.show{display:block}
+    .field-error{
+      display:none;
+      margin-top:6px;
+      color: rgba(239,68,68,.95);
+    }
+    input.invalid{
+      border-color: rgba(239,68,68,.7);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+    }
 
     .btnbar{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap}
     .btn{
@@ -512,7 +521,7 @@
               <div class="field">
                 <label for="email" data-tip-key="email">E-Mail <span class="tip-icon" tabindex="0" data-tip-key="email" aria-label="Hinweis zu E-Mail">i</span></label>
                 <input id="email" type="email" placeholder="name@bechtle.com" value="max.bechtle@bechtle.com" required aria-required="true" />
-                <div id="emailError" class="small" style="color: rgba(239,68,68,.95); display:none; margin-top:6px;">
+                <div id="emailError" class="field-error">
                   Bitte eine gültige Bechtle-E-Mail (@bechtle.com) eingeben.
                 </div>
               </div>
@@ -932,9 +941,6 @@
         return;
       }
 
-      const payload = buildFlowPayloadFromUi();
-      lastContext = payload;
-
       setLoading(true);
       feedbackNotice.classList.remove("show");
       setApiStatus("läuft…", "warn");
@@ -942,8 +948,11 @@
       setRunProgress(0, "Angebot wird generiert …");
       runIdEl.textContent = "local-" + Math.random().toString(16).slice(2, 8);
       panels.text.textContent = "Bitte warten – Angebot wird generiert …";
-      panels.json.textContent = JSON.stringify({ status: "pending" }, null, 2);
+      panels.json.textContent = JSON.stringify({ status: "pending", startedAt: new Date().toISOString() }, null, 2);
       startFakeRunProgress();
+
+      const payload = buildFlowPayloadFromUi();
+      lastContext = payload;
 
       try{
         const run = await safeFetch(apiUrl("/api/generate-offer"), {
