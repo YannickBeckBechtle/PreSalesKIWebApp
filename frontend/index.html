@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Presales KI – Angebotsunterstützung</title>
+  <title>Presales KI - Angebotsuntersttzung</title>
   <style>
     :root{
       --bg0:#0b1020;
@@ -164,7 +164,7 @@
       color: #fff;
     }
 
-    input[type="text"], input[type="number"], select, textarea{
+    input[type="text"], input[type="number"], input[type="email"], select, textarea{
       width:100%;
       padding:11px 12px;
       border-radius: 14px;
@@ -172,6 +172,8 @@
       background: var(--input-bg);
       color: var(--text);
       font-size: 14px;
+      appearance: none;
+      -webkit-appearance: none;
       outline:none;
       transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
     }
@@ -467,8 +469,8 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>Presales KI – Angebotsunterstützung</h1>
-          <div class="subtitle">Single-Page UI · Backend-Proxy auf Power Automate</div>
+          <h1>Presales KI - Angebotsuntersttzung</h1>
+          <div class="subtitle">Single-Page UI ú Backend-Proxy auf Power Automate</div>
         </div>
       </div>
 
@@ -483,7 +485,7 @@
             <div class="run-line">
               <span class="small">Run:</span>
               <span id="runId" class="kbd">-</span>
-              <span id="runStage" class="small muted">–</span>
+              <span id="runStage" class="small muted">-</span>
               <span id="runProgressLabel" class="kbd">0%</span>
             </div>
             <div class="run-progress">
@@ -501,7 +503,7 @@
             <h2 id="card-input-title">Eingabe / Angebotskontext</h2>
             <p>Strukturiere die Eingangsdaten, damit das Modell einen belastbaren Angebotsentwurf erzeugt.</p>
           </div>
-          <div class="small" title="Pflichtfelder zuerst">🧩</div>
+          <div class="small" title="Pflichtfelder zuerst">??</div>
         </div>
 
         <div class="card-b">
@@ -522,7 +524,7 @@
                 <label for="email" data-tip-key="email">E-Mail <span class="tip-icon" tabindex="0" data-tip-key="email" aria-label="Hinweis zu E-Mail">i</span></label>
                 <input id="email" type="email" placeholder="name@bechtle.com" value="max.bechtle@bechtle.com" required aria-required="true" />
                 <div id="emailError" class="field-error">
-                  Bitte eine gültige Bechtle-E-Mail (@bechtle.com) eingeben.
+                  Bitte eine gltige Bechtle-E-Mail (@bechtle.com) eingeben.
                 </div>
               </div>
             </div>
@@ -532,7 +534,7 @@
               <div class="select" id="categorySelectWrapper">
                 <button id="categorySelect" class="select-button" type="button" aria-haspopup="listbox" aria-expanded="false">
                   <span id="categoryLabel">Security</span>
-                  <span class="select-caret">▾</span>
+                  <span class="select-caret">?</span>
                 </button>
                 <div class="select-popover" id="categoryPopover">
                   <ul class="select-options" role="listbox" aria-label="Angebotskategorie" id="categoryOptions"></ul>
@@ -542,18 +544,18 @@
           </div>
 
           <div class="field">
-            <label for="primaryGoal" data-tip-key="primaryGoal">Primäres Ziel <span class="tip-icon" tabindex="0" data-tip-key="primaryGoal" aria-label="Hinweis zu Primäres Ziel">i</span></label>
+            <label for="primaryGoal" data-tip-key="primaryGoal">Prim„res Ziel <span class="tip-icon" tabindex="0" data-tip-key="primaryGoal" aria-label="Hinweis zu Prim„res Ziel">i</span></label>
             <input id="primaryGoal" type="text" placeholder="z. B. Absicherung von Cloud-Workloads" />
           </div>
 
           <div class="field">
             <label for="situation" data-tip-key="situation">Kundensituation <span class="tip-icon" tabindex="0" data-tip-key="situation" aria-label="Hinweis zu Kundensituation">i</span></label>
-            <textarea id="situation" placeholder="Aktuelle IT-Landschaft, Herausforderungen, Stakeholder …"></textarea>
+            <textarea id="situation" placeholder="Aktuelle IT-Landschaft, Herausforderungen, Stakeholder ."></textarea>
           </div>
 
           <div class="field">
             <label for="scope" data-tip-key="scope">Leistungsumfang (Stichpunkte) <span class="tip-icon" tabindex="0" data-tip-key="scope" aria-label="Hinweis zu Leistungsumfang">i</span></label>
-            <textarea id="scope" placeholder="Workshops, Architektur-Review, Umsetzung, Betrieb …"></textarea>
+            <textarea id="scope" placeholder="Workshops, Architektur-Review, Umsetzung, Betrieb ."></textarea>
           </div>
 
           <div class="field">
@@ -561,23 +563,28 @@
             <input id="pt" type="number" min="0" step="0.5" placeholder="z. B. 12.5" />
           </div>
 
-          <div class="field">
-            <label for="detailDescription" data-tip-key="detailDescription">Detailbeschreibung (wichtig) <span class="tip-icon" tabindex="0" data-tip-key="detailDescription" aria-label="Hinweis zu Detailbeschreibung">i</span></label>
-            <textarea id="detailDescription" placeholder="Randbedingungen, SLAs, Technologien, Zeitplan …"></textarea>
-          </div>
+          <div class="grid2">
+            <div class="field">
+              <label for="detailDescription" data-tip-key="detailDescription">Detailbeschreibung (wichtig) <span class="tip-icon" tabindex="0" data-tip-key="detailDescription" aria-label="Hinweis zu Detailbeschreibung">i</span></label>
+              <textarea id="detailDescription" placeholder="Tiefe Beschreibung des Szenarios, notwendige Randbedingungen, Sicherheitsvorgaben ."></textarea>
+            </div>
 
-          <div class="field">
-            <label for="notes" data-tip-key="notes">Weitere Hinweise (optional) <span class="tip-icon" tabindex="0" data-tip-key="notes" aria-label="Hinweis zu Weitere Hinweise">i</span></label>
-            <textarea id="notes" placeholder="Zusätzliche Infos, Abhängigkeiten, Risiken …"></textarea>
+            <div class="field">
+              <label for="notes" data-tip-key="notes">Weitere Hinweise (optional) <span class="tip-icon" tabindex="0" data-tip-key="notes" aria-label="Hinweis zu Weitere Hinweise">i</span></label>
+              <textarea id="notes" placeholder="Organisatorisches, W¸nsche, Abgrenzungen ."></textarea>
+            </div>
           </div>
 
           <div class="btnbar">
             <button id="generateBtn" class="btn btn-primary" type="button">
-              <span id="genIcon">✨</span>
-              <span>Angebot generieren</span>
+              <span class="spinner hidden" id="spinner"></span>
+              Angebot generieren
             </button>
-            <button id="resetBtn" class="btn btn-ghost" type="button" title="Felder zurücksetzen">↺</button>
+            <button id="resetBtn" class="btn btn-ghost" type="button">Zur¸cksetzen</button>
+            <button id="copyRun" class="btn btn-ghost" type="button">Run kopieren</button>
           </div>
+
+          <div class="notice" id="feedbackNotice" role="status" aria-live="polite"></div>
         </div>
       </section>
 
@@ -585,161 +592,156 @@
         <div class="card-h">
           <div>
             <h2 id="card-output-title">Generiertes Angebot</h2>
-            <p>Ausgabe wird aus der API geladen und als Text/JSON dargestellt.</p>
+            <p>Hier erscheint das generierte Angebot (Text oder JSON). Tabs umschalten, um Details zu sehen.</p>
           </div>
-          <div class="small" title="Ausgabequelle: /api/generate-offer">🔌</div>
+          <div class="small" title="Response Tabs">
+            <span class="kbd">Text</span> <span class="small">/</span> <span class="kbd">JSON</span>
+          </div>
         </div>
 
         <div class="card-b">
-          <div class="tabs" role="tablist" aria-label="Ausgabe-Ansichten">
+          <div class="tabs" role="tablist">
             <button class="tab-btn active" data-tab="text" role="tab" aria-selected="true">Text</button>
             <button class="tab-btn" data-tab="json" role="tab" aria-selected="false">JSON</button>
           </div>
+          <div class="panel" id="panel-text" role="tabpanel" aria-label="Text Panel">Noch kein Angebot generiert.</div>
+          <div class="panel mono hidden" id="panel-json" role="tabpanel" aria-label="JSON Panel">{}</div>
+        </div>
 
-          <div id="panel-text" class="panel" role="tabpanel">Noch kein Angebot generiert.</div>
-          <div id="panel-json" class="panel mono hidden" role="tabpanel">{}</div>
+        <div class="card-h">
+          <div>
+            <h2>Feedback</h2>
+            <p>Bewerte das Ergebnis (optional).</p>
+          </div>
+        </div>
+        <div class="card-b">
+          <div class="radio-row" role="radiogroup" aria-label="Feedback Bewertung">
+            <label><input type="radio" name="rating" value="bad" /> Schlecht</label>
+            <label><input type="radio" name="rating" value="meh" /> Mittel</label>
+            <label><input type="radio" name="rating" value="ok" /> Gut</label>
+            <label><input type="radio" name="rating" value="great" /> Super</label>
+          </div>
+          <textarea id="feedbackText" placeholder="Optionaler Kommentar" style="min-height:80px"></textarea>
+          <div class="btnbar">
+            <button id="saveFeedback" class="btn btn-primary" type="button">Feedback speichern</button>
+          </div>
+        </div>
 
+        <div class="card-h">
+          <div>
+            <h2>Letzte Runs</h2>
+            <p>Historie (falls Backend erreichbar).</p>
+          </div>
+          <button id="refreshHistory" class="btn btn-ghost" type="button">Aktualisieren</button>
+        </div>
+        <div class="card-b">
+          <table>
+            <thead>
+              <tr>
+                <th>Start</th>
+                <th>Kunde</th>
+                <th>Kategorie</th>
+                <th>Rating</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td colspan="5" class="small">Keine Historie vorhanden.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-h">
+          <div>
+            <h2>Eval / Scoring</h2>
+            <p>Bewerte die Qualit‰t des Angebots (optional).</p>
+          </div>
+        </div>
+        <div class="card-b">
           <div class="eval">
-            <div class="radio-row" aria-label="Rating">
-              <label><input type="radio" name="rating" value="good"> 👍 gut</label>
-              <label><input type="radio" name="rating" value="ok"> 👌 teilweise passend</label>
-              <label><input type="radio" name="rating" value="bad"> 👎 ungeeignet</label>
+            <div class="radio-row" role="radiogroup" aria-label="Eval Rating">
+              <label><input type="radio" name="ratingEval" value="1" /> 1</label>
+              <label><input type="radio" name="ratingEval" value="2" /> 2</label>
+              <label><input type="radio" name="ratingEval" value="3" /> 3</label>
+              <label><input type="radio" name="ratingEval" value="4" /> 4</label>
+              <label><input type="radio" name="ratingEval" value="5" /> 5</label>
             </div>
-
-            <div class="field" style="margin-bottom:10px;">
-              <label for="feedbackText">Kommentar / Annotation</label>
-              <textarea id="feedbackText" placeholder="Warum (nicht) passend? Hinweise für Feinjustierung …"></textarea>
-            </div>
-
-            <div class="btnbar">
-              <button id="saveFeedback" class="btn btn-ghost" type="button">Feedback speichern</button>
-              <button id="copyRun" class="btn btn-ghost" type="button" title="JSON des Runs kopieren">⧉ Run kopieren</button>
-            </div>
-
-            <div id="feedbackNotice" class="notice">Feedback gespeichert</div>
           </div>
+        </div>
 
-          <div class="foot">
-            Hinweis: API-Key wird <b>nicht</b> im Browser gehalten. Der Backend-Proxy ruft Power Automate auf.
-          </div>
+        <div class="foot">
+          Backend ruft Power Automate (HTTP Trigger) ¸ber /api/generate-offer auf. Bitte Feld "Verantwortliche Person (Kunde)" ausf¸llen.
         </div>
       </section>
     </main>
-
-    <section class="card" style="margin-top:16px" aria-labelledby="card-history-title">
-      <div class="card-h">
-        <div>
-          <h2 id="card-history-title">Historie der Läufe</h2>
-          <p>Letzte Runs aus dem Backend (aktuell In-Memory, optional später DB).</p>
-        </div>
-        <button id="refreshHistory" class="btn btn-ghost" type="button" title="Historie laden">⟳</button>
-      </div>
-      <div class="card-b" style="padding-top:12px">
-        <table>
-          <thead>
-            <tr>
-              <th>Datum</th>
-              <th>Kunde</th>
-              <th>Kategorie</th>
-              <th>Rating</th>
-              <th>Aktionen</th>
-            </tr>
-          </thead>
-          <tbody id="historyBody">
-            <tr>
-              <td colspan="5" class="small">Noch keine Historie geladen.</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="foot">
-          Erwartete Endpoints: <span class="kbd">GET /api/health</span>, <span class="kbd">POST /api/generate-offer</span>, <span class="kbd">POST /api/feedback</span>, <span class="kbd">GET /api/history</span>.
-        </div>
-      </div>
-    </section>
   </div>
 
-  <script src="./config.js"></script>
   <script src="./tooltips.js"></script>
+  <script src="./config.js"></script>
   <script>
-    const APP_CONFIG = window.APP_CONFIG || {};
-    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || "").replace(/\/$/, "");
+    const CATEGORY_OPTIONS = ["Security", "Modern Workplace", "Cloud", "Data / AI", "Netzwerk", "Sonstiges"];
+    let categoryIndex = 0;
+    let categoryValue = CATEGORY_OPTIONS[0];
 
-    const apiUrl = (path) => `${API_BASE_URL}${path}`;
-
-    const CATEGORY_OPTIONS = [
-      "Security",
-      "Modern Workplace",
-      "Cloud Migration",
-      "Managed Services",
-      "Beratung / Workshops",
-      "Sonstiges"
-    ];
-
-    const tabButtons = document.querySelectorAll(".tab-btn");
     const panels = {
       text: document.getElementById("panel-text"),
-      json: document.getElementById("panel-json")
+      json: document.getElementById("panel-json"),
     };
-    tabButtons.forEach(btn => {
+    const tabs = document.querySelectorAll(".tab-btn");
+    tabs.forEach(btn => {
       btn.addEventListener("click", () => {
-        tabButtons.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-selected","false"); });
+        tabs.forEach(el => el.classList.remove("active"));
         btn.classList.add("active");
-        btn.setAttribute("aria-selected","true");
-        Object.keys(panels).forEach(key => {
-          panels[key].classList.toggle("hidden", key !== btn.dataset.tab);
-        });
+        const tab = btn.dataset.tab;
+        panels.text.classList.toggle("hidden", tab !== "text");
+        panels.json.classList.toggle("hidden", tab !== "json");
+        btn.setAttribute("aria-selected", "true");
+        tabs.forEach(el => { if(el !== btn) el.setAttribute("aria-selected", "false"); });
       });
     });
 
-    const $ = (id) => document.getElementById(id);
-    const apiStatus = $("apiStatus");
-    const apiDot = $("apiDot");
-    const runDot = $("runDot");
-    const runIdEl = $("runId");
-    const runStage = $("runStage");
-    const runProgressBar = $("runProgressBar");
-    const runProgressLabel = $("runProgressLabel");
-    const generateBtn = $("generateBtn");
-    const genIcon = $("genIcon");
-    const feedbackNotice = $("feedbackNotice");
+    const apiStatus = document.getElementById("apiStatus");
+    const apiDot = document.getElementById("apiDot");
+    const runIdEl = document.getElementById("runId");
+    const runStage = document.getElementById("runStage");
+    const runDot = document.getElementById("runDot");
+    const runProgressBar = document.getElementById("runProgressBar");
+    const runProgressLabel = document.getElementById("runProgressLabel");
+    const generateBtn = document.getElementById("generateBtn");
+    const feedbackNotice = document.getElementById("feedbackNotice");
+    const spinner = document.getElementById("spinner");
 
+    let isLoading = false;
     let lastRun = null;
     let lastContext = null;
-    let categoryValue = CATEGORY_OPTIONS[0];
-    let categoryIndex = 0;
     let progressTimer = null;
     let progressStartMs = 0;
-    let isLoading = false;
-    function setLoading(state){
-      isLoading = state;
-      if(isLoading){
-        generateBtn.disabled = true;
-        genIcon.innerHTML = '<span class="spinner" aria-hidden="true"></span>';
-      }else{
-        generateBtn.disabled = !validateEmail();
-        genIcon.textContent = "✨";
-      }
-    }
 
-    function toRatingEmoji(value){
-      if(value === "good") return "👍";
-      if(value === "ok") return "👌";
-      if(value === "bad") return "👎";
-      return "—";
+    function $(id){ return document.getElementById(id); }
+
+    function setLoading(flag){
+      isLoading = flag;
+      generateBtn.disabled = flag;
+      spinner.classList.toggle("hidden", !flag);
     }
 
     function nowDE(){
-      const d = new Date();
-      return d.toLocaleString("de-DE", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+      return new Date().toLocaleString("de-DE");
+    }
+
+    function apiUrl(path){
+      if(path.startsWith("http")) return path;
+      const base = window.API_BASE || "";
+      return base + path;
     }
 
     async function safeFetch(url, options){
       const res = await fetch(url, options);
       const text = await res.text();
       let data = null;
-      try { data = text ? JSON.parse(text) : null; } catch (e) { data = { raw: text }; }
+      try{ data = JSON.parse(text); }catch(_){}
       if(!res.ok){
-        const msg = data?.error || data?.message || ("HTTP " + res.status);
+        const msg = (data && (data.error || data.message)) ? String(data.error || data.message) : text || res.statusText || "Request fehlgeschlagen";
         throw new Error(msg);
       }
       return data;
@@ -750,16 +752,151 @@
       try { return JSON.stringify(data ?? {}, null, 2); } catch (_) { return String(data); }
     }
 
+    function offerJsonToText(anyData){
+      function tryParse(val){
+        if(typeof val === "string"){
+          try { return JSON.parse(val); } catch(_) { return null; }
+        }
+        return val;
+      }
+
+      function isOffer(obj){
+        if(!obj || typeof obj !== "object") return false;
+        return Array.isArray(obj.leistungsumfang) || typeof obj.kostenuebersicht === "object" || typeof obj.kundendaten === "object";
+      }
+
+      function findOffer(obj, depth = 0){
+        if(!obj || typeof obj !== "object" || depth > 4) return null;
+        if(isOffer(obj)) return obj;
+        const keys = ["offer","output","result","data","body","raw","response","payload","value"];
+        for(const key of keys){
+          if(Object.prototype.hasOwnProperty.call(obj, key)){
+            const cand = tryParse(obj[key]);
+            const found = isOffer(cand) ? cand : findOffer(cand, depth + 1);
+            if(found) return found;
+          }
+        }
+        return null;
+      }
+
+      const root = tryParse(anyData);
+      const offer = isOffer(root) ? root : findOffer(root);
+      if(!offer) return "";
+
+      const lines = [];
+      const kd = offer.kundendaten || {};
+      const pb = offer.projektbeschreibung || {};
+      const lw = Array.isArray(offer.leistungsumfang) ? offer.leistungsumfang : [];
+      const kosten = offer.kostenuebersicht || {};
+      const refs = Array.isArray(offer.referenzen) ? offer.referenzen : [];
+      const opt = offer.optionale_abschnitte || {};
+
+      const fmtMoney = (n) => {
+        const num = typeof n === "number" ? n : Number(String(n).replace(/\./g, "").replace(",", "."));
+        return Number.isFinite(num) ? new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) : null;
+      };
+
+      lines.push(`Angebot${offer.dokument_id ? ` (${offer.dokument_id})` : ""}`);
+      const kdParts = [];
+      if(kd.firma) kdParts.push(`Kunde: ${kd.firma}`);
+      if(kd.kontaktperson) kdParts.push(`Kontakt: ${kd.kontaktperson}`);
+      if(kd.branche) kdParts.push(`Branche: ${kd.branche}`);
+      if(kd.standort) kdParts.push(`Standort: ${kd.standort}`);
+      if(kdParts.length){ lines.push(kdParts.join(" | ")); }
+      lines.push("");
+
+      if(pb.ziel || pb.ausgangssituation || pb.umfang){
+        lines.push("Projektziel:");
+        if(pb.ziel) lines.push(`- ${pb.ziel}`);
+        lines.push("Ausgangssituation:");
+        if(pb.ausgangssituation) lines.push(`- ${pb.ausgangssituation}`);
+        lines.push("Umfang:");
+        if(pb.umfang) lines.push(`- ${pb.umfang}`);
+        lines.push("");
+      }
+
+      if(lw.length){
+        lines.push("Leistungsumfang:");
+        lw.forEach((pos, idx) => {
+          const nr = pos.positionsnummer || idx + 1;
+          const meta = [pos.kategorie, pos.bezugsobjekt].filter(Boolean).join(" / ");
+          const title = pos.titel ? ` – ${pos.titel}` : "";
+          const header = `Pos. ${nr}${title}${meta ? ` (${meta})` : ""}`;
+          lines.push(header);
+          if(pos.beschreibung) lines.push(String(pos.beschreibung));
+          lines.push("");
+        });
+      }
+
+      const moneyLines = [];
+      if(kosten.zwischensumme != null){
+        const v = fmtMoney(kosten.zwischensumme);
+        if(v) moneyLines.push(`- Zwischensumme: ${v} ${kosten.waehrung || "EUR"}`);
+      }
+      if(kosten.rabatte != null){
+        const v = fmtMoney(kosten.rabatte);
+        if(v) moneyLines.push(`- Rabatte: ${v} ${kosten.waehrung || "EUR"}`);
+      }
+      if(kosten.gesamtbetrag != null){
+        const v = fmtMoney(kosten.gesamtbetrag);
+        if(v) moneyLines.push(`- Gesamtbetrag: ${v} ${kosten.waehrung || "EUR"}`);
+      }
+      const posArr = Array.isArray(kosten.positionen) ? kosten.positionen : [];
+      if(moneyLines.length || posArr.length){
+        lines.push("Kostenübersicht:");
+        moneyLines.forEach(l => lines.push(l));
+        if(posArr.length){
+          lines.push("Positionen:");
+          posArr.forEach((p, idx) => {
+            const nr = p.positionsnummer || idx + 1;
+            const menge = fmtMoney(p.menge) || p.menge;
+            const einzel = fmtMoney(p.einzelpreis);
+            const gesamt = fmtMoney(p.gesamtpreis);
+            const waehrung = p.waehrung || kosten.waehrung || "EUR";
+            const unit = [menge, p.einheit].filter(Boolean).join(" ");
+            const pricePart = (einzel && unit) ? `${unit} × ${einzel}` : (einzel || unit || "");
+            const totalPart = gesamt ? ` = ${gesamt} ${waehrung}` : (waehrung && pricePart ? ` ${waehrung}` : "");
+            lines.push(`- Pos. ${nr}${p.titel ? ` – ${p.titel}` : ""}: ${pricePart}${totalPart}`);
+          });
+        }
+        lines.push("");
+      }
+
+      if(refs.length){
+        lines.push("Referenzen:");
+        refs.forEach(r => {
+          const cls = [r.primaerklasse, r.sekundaerklasse].filter(Boolean).join(" / ");
+          const reason = r.aehnlichkeitsgrund || r.ähnlichkeitsgrund || r.reason || "";
+          const id = r.dokument_id || r.id || "?";
+          const line = `- ${id}${cls ? ` (${cls})` : ""}${reason ? `: ${reason}` : ""}`;
+          lines.push(line);
+        });
+        lines.push("");
+      }
+
+      const optEntries = Object.entries(opt).filter(([_, v]) => Boolean(v));
+      if(optEntries.length){
+        lines.push("Optionale Abschnitte:");
+        optEntries.forEach(([key, val]) => {
+          const label = key.replace(/_/g, " ");
+          lines.push(`- ${label}: ${val}`);
+        });
+        lines.push("");
+      }
+
+      return lines.join("\n").trim();
+    }
+
     function renderRun(run){
       lastRun = run;
 
-      runIdEl.textContent = run?.runId || "—";
+      runIdEl.textContent = run?.runId || "-";
 
-      const text = typeof run?.text === "string" ? run.text : "";
+      const pretty = offerJsonToText(run);
+      const text = pretty || (typeof run?.text === "string" ? run.text : "");
       panels.text.textContent = text || "Keine Antwort erhalten.";
       panels.json.textContent = formatJsonPanel(run);
     }
-
     function parsePtValue(raw){
       if(!raw) return null;
       const normalized = String(raw).replace(",", ".").trim();
@@ -886,23 +1023,23 @@
       const ramp70to100Ms = 60000; // 1 Minute
       const totalMs = rampTo70Ms + ramp70to100Ms;
 
-      setRunProgress(0, "Angebot wird generiert …");
+      setRunProgress(0, "Angebot wird generiert .");
 
       progressTimer = setInterval(() => {
         const t = Date.now() - progressStartMs;
         if (t <= rampTo70Ms){
           const pct = (t / rampTo70Ms) * 70;
-          setRunProgress(pct, "Angebot wird generiert …");
+          setRunProgress(pct, "Angebot wird generiert .");
           return;
         }
 
         const t2 = Math.min(ramp70to100Ms, t - rampTo70Ms);
         const pct = 70 + (t2 / ramp70to100Ms) * 30;
-        setRunProgress(pct, "Angebot wird zum Versenden vorbereitet …");
+        setRunProgress(pct, "Angebot wird zum Versenden vorbereitet .");
 
         if (t >= totalMs){
           stopFakeRunProgress();
-          setRunProgress(100, "Angebot wird zum Versenden vorbereitet …");
+          setRunProgress(100, "Angebot wird zum Versenden vorbereitet .");
         }
       }, 500);
     }
@@ -913,7 +1050,7 @@
         const apiText = data?.api || "online";
         const tone = apiText.toLowerCase().includes("offline") ? "warn" : "ok";
         setApiStatus(apiText, tone);
-        if(runIdEl.textContent === "—" && data?.run){
+        if(runIdEl.textContent === "-" && data?.run){
           runIdEl.textContent = data.run;
         }
       }catch(e){
@@ -930,24 +1067,24 @@
       }
 
       if(!validateEmail()){
-        panels.text.textContent = "Bitte E-Mail prüfen (nur @bechtle.com).";
+        panels.text.textContent = "Bitte E-Mail prfen (nur @bechtle.com).";
         panels.json.textContent = JSON.stringify({ status:"invalid_input", field:"email" }, null, 2);
-        setApiStatus("Eingabe prüfen", "warn");
+        setApiStatus("Eingabe prfen", "warn");
         return;
       }
 
       if(!formValues.primaryGoal && !formValues.customerSituation && !formValues.details){
-        panels.text.textContent = "Bitte mindestens „Primäres Ziel“, „Kundensituation“ oder „Detailbeschreibung“ ausfüllen.";
+        panels.text.textContent = "Bitte mindestens \"Prim„res Ziel\", \"Kundensituation\" oder \"Detailbeschreibung\" ausfllen.";
         return;
       }
 
       setLoading(true);
       feedbackNotice.classList.remove("show");
-      setApiStatus("läuft…", "warn");
+      setApiStatus("l„uft.", "warn");
       setRunTone("warn");
-      setRunProgress(0, "Angebot wird generiert …");
+      setRunProgress(0, "Angebot wird generiert .");
       runIdEl.textContent = "local-" + Math.random().toString(16).slice(2, 8);
-      panels.text.textContent = "Bitte warten – Angebot wird generiert …";
+      panels.text.textContent = "Bitte warten - Angebot wird generiert .";
       panels.json.textContent = JSON.stringify({ status: "pending", startedAt: new Date().toISOString() }, null, 2);
       startFakeRunProgress();
 
@@ -989,7 +1126,7 @@
     $("email").addEventListener("input", () => {
       validateEmail();
       if(!validateEmail()){
-        setApiStatus("Eingabe prüfen", "warn");
+        setApiStatus("Eingabe prfen", "warn");
       }
     });
 
@@ -1000,13 +1137,13 @@
       clearFieldError("responsiblePerson");
       panels.text.textContent = "Noch kein Angebot generiert.";
       panels.json.textContent = "{}";
-      runIdEl.textContent = "—";
+      runIdEl.textContent = "-";
       feedbackNotice.classList.remove("show");
       lastRun = null;
       lastContext = null;
       stopFakeRunProgress();
       setRunTone(null);
-      setRunProgress(0, "–");
+      setRunProgress(0, "-");
     });
 
     $("saveFeedback").addEventListener("click", async () => {
@@ -1027,7 +1164,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        feedbackNotice.textContent = "Feedback gespeichert – danke!";
+        feedbackNotice.textContent = "Feedback gespeichert - danke!";
       }catch(e){
         feedbackNotice.textContent = "Feedback lokal gespeichert (Backend nicht erreichbar).";
         try{
@@ -1048,7 +1185,7 @@
         feedbackNotice.classList.add("show");
         setTimeout(() => feedbackNotice.classList.remove("show"), 1500);
       }catch(e){
-        feedbackNotice.textContent = "Kopieren nicht möglich (Browser-Policy).";
+        feedbackNotice.textContent = "Kopieren nicht m”glich (Browser-Policy).";
         feedbackNotice.classList.add("show");
         setTimeout(() => feedbackNotice.classList.remove("show"), 1500);
       }
@@ -1056,7 +1193,7 @@
 
     async function loadHistory(){
       const body = $("historyBody");
-      body.innerHTML = `<tr><td colspan="5" class="small">Lade Historie …</td></tr>`;
+      body.innerHTML = `<tr><td colspan="5" class="small">Lade Historie .</td></tr>`;
       try{
         const data = await safeFetch(apiUrl("/api/history"), { method: "GET" });
         const items = data?.items || [];
@@ -1069,11 +1206,11 @@
         items.slice(0, 20).forEach(item => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${item.startedAt ? new Date(item.startedAt).toLocaleString("de-DE") : "—"}</td>
-            <td>${item.customer || "—"}</td>
-            <td><span class="tag">${item.category || "—"}</span></td>
+            <td>${item.startedAt ? new Date(item.startedAt).toLocaleString("de-DE") : "-"}</td>
+            <td>${item.customer || "-"}</td>
+            <td><span class="tag">${item.category || "-"}</span></td>
             <td class="rating">${toRatingEmoji(item.rating)}</td>
-            <td><button class="btn btn-ghost" type="button" data-open="${item.runId || ""}">Öffnen</button></td>
+            <td><button class="btn btn-ghost" type="button" data-open="${item.runId || ""}">™ffnen</button></td>
           `;
           body.appendChild(tr);
         });
@@ -1093,7 +1230,7 @@
         });
 
       }catch(e){
-        body.innerHTML = `<tr><td colspan="5" class="small">Historie nicht erreichbar (Backend fehlt). Demo-Einträge werden angezeigt.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="5" class="small">Historie nicht erreichbar (Backend fehlt). Demo-Eintr„ge werden angezeigt.</td></tr>`;
         const demo = [
           { startedAt: nowDE(), customer: "Demo Kunde", category: "Security", rating: "ok", runId: "demo-001" }
         ];
@@ -1104,7 +1241,7 @@
             <td>${item.customer}</td>
             <td><span class="tag">${item.category}</span></td>
             <td class="rating">${toRatingEmoji(item.rating)}</td>
-            <td><button class="btn btn-ghost" type="button" disabled>Öffnen</button></td>
+            <td><button class="btn btn-ghost" type="button" disabled>™ffnen</button></td>
           `;
           body.appendChild(tr);
         });
