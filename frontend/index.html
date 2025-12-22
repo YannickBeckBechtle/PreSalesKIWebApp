@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Presales KI - Angebotsuntersttzung</title>
+  <title>Presales KI - Angebotsunterstützung</title>
   <style>
     :root{
       --bg0:#0b1020;
@@ -469,8 +469,8 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>Presales KI - Angebotsuntersttzung</h1>
-          <div class="subtitle">Single-Page UI ú Backend-Proxy auf Power Automate</div>
+          <h1>Presales KI - Angebotsunterstützung</h1>
+          <div class="subtitle">Single-Page UI · Backend-Proxy auf Power Automate</div>
         </div>
       </div>
 
@@ -524,7 +524,7 @@
                 <label for="email" data-tip-key="email">E-Mail <span class="tip-icon" tabindex="0" data-tip-key="email" aria-label="Hinweis zu E-Mail">i</span></label>
                 <input id="email" type="email" placeholder="name@bechtle.com" value="max.bechtle@bechtle.com" required aria-required="true" />
                 <div id="emailError" class="field-error">
-                  Bitte eine gltige Bechtle-E-Mail (@bechtle.com) eingeben.
+                  Bitte eine gültige Bechtle-E-Mail (@bechtle.com) eingeben.
                 </div>
               </div>
             </div>
@@ -544,7 +544,7 @@
           </div>
 
           <div class="field">
-            <label for="primaryGoal" data-tip-key="primaryGoal">Prim„res Ziel <span class="tip-icon" tabindex="0" data-tip-key="primaryGoal" aria-label="Hinweis zu Prim„res Ziel">i</span></label>
+            <label for="primaryGoal" data-tip-key="primaryGoal">Primäres Ziel <span class="tip-icon" tabindex="0" data-tip-key="primaryGoal" aria-label="Hinweis zu Primäres Ziel">i</span></label>
             <input id="primaryGoal" type="text" placeholder="z. B. Absicherung von Cloud-Workloads" />
           </div>
 
@@ -580,7 +580,7 @@
               <span class="spinner hidden" id="spinner"></span>
               Angebot generieren
             </button>
-            <button id="resetBtn" class="btn btn-ghost" type="button">Zur¸cksetzen</button>
+            <button id="resetBtn" class="btn btn-ghost" type="button">Zurücksetzen</button>
             <button id="copyRun" class="btn btn-ghost" type="button">Run kopieren</button>
           </div>
 
@@ -594,10 +594,7 @@
             <h2 id="card-output-title">Generiertes Angebot</h2>
             <p>Hier erscheint das generierte Angebot (Text oder JSON). Tabs umschalten, um Details zu sehen.</p>
           </div>
-          <div class="small" title="Response Tabs">
-            <span class="kbd">Text</span> <span class="small">/</span> <span class="kbd">JSON</span>
           </div>
-        </div>
 
         <div class="card-b">
           <div class="tabs" role="tablist">
@@ -716,6 +713,7 @@
     let lastContext = null;
     let progressTimer = null;
     let progressStartMs = 0;
+    let loadingTimeout = null;
 
     function $(id){ return document.getElementById(id); }
 
@@ -723,6 +721,17 @@
       isLoading = flag;
       generateBtn.disabled = flag;
       spinner.classList.toggle("hidden", !flag);
+      if(loadingTimeout){
+        clearTimeout(loadingTimeout);
+        loadingTimeout = null;
+      }
+      if(flag){
+        loadingTimeout = setTimeout(() => {
+          isLoading = false;
+          generateBtn.disabled = false;
+          spinner.classList.add("hidden");
+        }, 180000);
+      }
     }
 
     function nowDE(){
@@ -1023,23 +1032,24 @@
       const ramp70to100Ms = 60000; // 1 Minute
       const totalMs = rampTo70Ms + ramp70to100Ms;
 
-      setRunProgress(0, "Angebot wird generiert .");
+      setRunProgress(0, "Angebot wird generiert...");
 
       progressTimer = setInterval(() => {
         const t = Date.now() - progressStartMs;
         if (t <= rampTo70Ms){
           const pct = (t / rampTo70Ms) * 70;
-          setRunProgress(pct, "Angebot wird generiert .");
+          setRunProgress(pct, "Angebot wird generiert...");
           return;
         }
 
         const t2 = Math.min(ramp70to100Ms, t - rampTo70Ms);
         const pct = 70 + (t2 / ramp70to100Ms) * 30;
-        setRunProgress(pct, "Angebot wird zum Versenden vorbereitet .");
+        setRunProgress(pct, "Angebot wird zum Versenden vorbereitet...");
 
         if (t >= totalMs){
           stopFakeRunProgress();
-          setRunProgress(100, "Angebot wird zum Versenden vorbereitet .");
+          setRunProgress(100, "Angebot wird zum Versenden vorbereitet...");
+          setLoading(false);
         }
       }, 500);
     }
@@ -1067,14 +1077,14 @@
       }
 
       if(!validateEmail()){
-        panels.text.textContent = "Bitte E-Mail prfen (nur @bechtle.com).";
+        panels.text.textContent = "Bitte E-Mail prüfen (nur @bechtle.com).";
         panels.json.textContent = JSON.stringify({ status:"invalid_input", field:"email" }, null, 2);
-        setApiStatus("Eingabe prfen", "warn");
+        setApiStatus("Eingabe prüfen", "warn");
         return;
       }
 
       if(!formValues.primaryGoal && !formValues.customerSituation && !formValues.details){
-        panels.text.textContent = "Bitte mindestens \"Prim„res Ziel\", \"Kundensituation\" oder \"Detailbeschreibung\" ausfllen.";
+        panels.text.textContent = "Bitte mindestens \"Primäres Ziel\", \"Kundensituation\" oder \"Detailbeschreibung\" ausfllen.";
         return;
       }
 
@@ -1082,9 +1092,9 @@
       feedbackNotice.classList.remove("show");
       setApiStatus("l„uft.", "warn");
       setRunTone("warn");
-      setRunProgress(0, "Angebot wird generiert .");
+      setRunProgress(0, "Angebot wird generiert...");
       runIdEl.textContent = "local-" + Math.random().toString(16).slice(2, 8);
-      panels.text.textContent = "Bitte warten - Angebot wird generiert .";
+      panels.text.textContent = "Bitte warten - Angebot wird generiert...";
       panels.json.textContent = JSON.stringify({ status: "pending", startedAt: new Date().toISOString() }, null, 2);
       startFakeRunProgress();
 
@@ -1126,7 +1136,7 @@
     $("email").addEventListener("input", () => {
       validateEmail();
       if(!validateEmail()){
-        setApiStatus("Eingabe prfen", "warn");
+        setApiStatus("Eingabe prüfen", "warn");
       }
     });
 
@@ -1443,3 +1453,8 @@
   </script>
 </body>
 </html>
+
+
+
+
+
