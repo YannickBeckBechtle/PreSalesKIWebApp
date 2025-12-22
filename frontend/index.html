@@ -578,7 +578,6 @@ var(--surface-panel), var(--surface-panel-hover));}
 
           <div class="btnbar">
             <button id="generateBtn" class="btn btn-primary" type="button">
-              <span class="spinner hidden" id="spinner"></span>
               Angebot generieren
             </button>
             <button id="resetBtn" class="btn btn-ghost" type="button">Zurücksetzen</button>
@@ -721,7 +720,7 @@ var(--surface-panel), var(--surface-panel-hover));}
     function setLoading(flag){
       isLoading = flag;
       generateBtn.disabled = flag;
-      spinner.classList.toggle("hidden", !flag);
+      if(spinner){ spinner.classList.add("hidden"); }
       if(loadingTimeout){
         clearTimeout(loadingTimeout);
         loadingTimeout = null;
@@ -730,7 +729,7 @@ var(--surface-panel), var(--surface-panel-hover));}
         loadingTimeout = setTimeout(() => {
           isLoading = false;
           generateBtn.disabled = false;
-          spinner.classList.add("hidden");
+          if(spinner){ spinner.classList.add("hidden"); }
         }, 180000);
       }
     }
