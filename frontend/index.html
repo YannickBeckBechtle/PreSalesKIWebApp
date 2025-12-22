@@ -388,7 +388,8 @@
       padding:10px 12px;
       transition: border-color .15s ease, background .15s ease;
     }
-    details[open]{border-color: var(--surface-panel-border-strong); background: linear-gradient(180deg, var(--surface-panel), var(--surface-panel-hover));}
+    details[open]{border-color: var(--surface-panel-border-strong); background: linear-gradient(180deg, 
+var(--surface-panel), var(--surface-panel-hover));}
     details summary{cursor:pointer; color: var(--text); font-weight: 700; outline:none;}
     details summary:hover{color: #fff;}
 
@@ -534,7 +535,7 @@
               <div class="select" id="categorySelectWrapper">
                 <button id="categorySelect" class="select-button" type="button" aria-haspopup="listbox" aria-expanded="false">
                   <span id="categoryLabel">Security</span>
-                  <span class="select-caret">?</span>
+                  <span class="select-caret">▾</span>
                 </button>
                 <div class="select-popover" id="categoryPopover">
                   <ul class="select-options" role="listbox" aria-label="Angebotskategorie" id="categoryOptions"></ul>
@@ -550,12 +551,12 @@
 
           <div class="field">
             <label for="situation" data-tip-key="situation">Kundensituation <span class="tip-icon" tabindex="0" data-tip-key="situation" aria-label="Hinweis zu Kundensituation">i</span></label>
-            <textarea id="situation" placeholder="Aktuelle IT-Landschaft, Herausforderungen, Stakeholder ."></textarea>
+            <textarea id="situation" placeholder="Aktuelle IT-Landschaft, Herausforderungen, Stakeholder …"></textarea>
           </div>
 
           <div class="field">
             <label for="scope" data-tip-key="scope">Leistungsumfang (Stichpunkte) <span class="tip-icon" tabindex="0" data-tip-key="scope" aria-label="Hinweis zu Leistungsumfang">i</span></label>
-            <textarea id="scope" placeholder="Workshops, Architektur-Review, Umsetzung, Betrieb ."></textarea>
+            <textarea id="scope" placeholder="Workshops, Architektur-Review, Umsetzung, Betrieb …"></textarea>
           </div>
 
           <div class="field">
@@ -566,12 +567,12 @@
           <div class="grid2">
             <div class="field">
               <label for="detailDescription" data-tip-key="detailDescription">Detailbeschreibung (wichtig) <span class="tip-icon" tabindex="0" data-tip-key="detailDescription" aria-label="Hinweis zu Detailbeschreibung">i</span></label>
-              <textarea id="detailDescription" placeholder="Tiefe Beschreibung des Szenarios, notwendige Randbedingungen, Sicherheitsvorgaben ."></textarea>
+              <textarea id="detailDescription" placeholder="Tiefe Beschreibung des Szenarios, notwendige Randbedingungen, Sicherheitsvorgaben …"></textarea>
             </div>
 
             <div class="field">
               <label for="notes" data-tip-key="notes">Weitere Hinweise (optional) <span class="tip-icon" tabindex="0" data-tip-key="notes" aria-label="Hinweis zu Weitere Hinweise">i</span></label>
-              <textarea id="notes" placeholder="Organisatorisches, W¸nsche, Abgrenzungen ."></textarea>
+              <textarea id="notes" placeholder="Organisatorisches, Wünsche, Abgrenzungen …"></textarea>
             </div>
           </div>
 
@@ -594,7 +595,7 @@
             <h2 id="card-output-title">Generiertes Angebot</h2>
             <p>Hier erscheint das generierte Angebot (Text oder JSON). Tabs umschalten, um Details zu sehen.</p>
           </div>
-          </div>
+        </div>
 
         <div class="card-b">
           <div class="tabs" role="tablist">
@@ -651,7 +652,7 @@
         <div class="card-h">
           <div>
             <h2>Eval / Scoring</h2>
-            <p>Bewerte die Qualit‰t des Angebots (optional).</p>
+            <p>Bewerte die Qualität des Angebots (optional).</p>
           </div>
         </div>
         <div class="card-b">
@@ -667,7 +668,7 @@
         </div>
 
         <div class="foot">
-          Backend ruft Power Automate (HTTP Trigger) ¸ber /api/generate-offer auf. Bitte Feld "Verantwortliche Person (Kunde)" ausf¸llen.
+          Backend ruft Power Automate (HTTP Trigger) über /api/generate-offer auf. Bitte Feld "Verantwortliche Person (Kunde)" ausfüllen.
         </div>
       </section>
     </main>
@@ -1084,17 +1085,17 @@
       }
 
       if(!formValues.primaryGoal && !formValues.customerSituation && !formValues.details){
-        panels.text.textContent = "Bitte mindestens \"Primäres Ziel\", \"Kundensituation\" oder \"Detailbeschreibung\" ausfllen.";
+        panels.text.textContent = "Bitte mindestens \"Primäres Ziel\", \"Kundensituation\" oder \"Detailbeschreibung\" ausfüllen.";
         return;
       }
 
       setLoading(true);
       feedbackNotice.classList.remove("show");
-      setApiStatus("l„uft.", "warn");
+      setApiStatus("läuft", "warn");
       setRunTone("warn");
       setRunProgress(0, "Angebot wird generiert...");
       runIdEl.textContent = "local-" + Math.random().toString(16).slice(2, 8);
-      panels.text.textContent = "Bitte warten - Angebot wird generiert...";
+      panels.text.textContent = "Bitte warten – Angebot wird generiert...";
       panels.json.textContent = JSON.stringify({ status: "pending", startedAt: new Date().toISOString() }, null, 2);
       startFakeRunProgress();
 
@@ -1195,7 +1196,7 @@
         feedbackNotice.classList.add("show");
         setTimeout(() => feedbackNotice.classList.remove("show"), 1500);
       }catch(e){
-        feedbackNotice.textContent = "Kopieren nicht m”glich (Browser-Policy).";
+        feedbackNotice.textContent = "Kopieren nicht möglich (Browser-Policy).";
         feedbackNotice.classList.add("show");
         setTimeout(() => feedbackNotice.classList.remove("show"), 1500);
       }
@@ -1203,7 +1204,7 @@
 
     async function loadHistory(){
       const body = $("historyBody");
-      body.innerHTML = `<tr><td colspan="5" class="small">Lade Historie .</td></tr>`;
+      body.innerHTML = `<tr><td colspan="5" class="small">Lade Historie …</td></tr>`;
       try{
         const data = await safeFetch(apiUrl("/api/history"), { method: "GET" });
         const items = data?.items || [];
@@ -1220,7 +1221,7 @@
             <td>${item.customer || "-"}</td>
             <td><span class="tag">${item.category || "-"}</span></td>
             <td class="rating">${toRatingEmoji(item.rating)}</td>
-            <td><button class="btn btn-ghost" type="button" data-open="${item.runId || ""}">™ffnen</button></td>
+            <td><button class="btn btn-ghost" type="button" data-open="${item.runId || ""}">Öffnen</button></td>
           `;
           body.appendChild(tr);
         });
@@ -1240,7 +1241,7 @@
         });
 
       }catch(e){
-        body.innerHTML = `<tr><td colspan="5" class="small">Historie nicht erreichbar (Backend fehlt). Demo-Eintr„ge werden angezeigt.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="5" class="small">Historie nicht erreichbar (Backend fehlt). Demo-Einträge werden angezeigt.</td></tr>`;
         const demo = [
           { startedAt: nowDE(), customer: "Demo Kunde", category: "Security", rating: "ok", runId: "demo-001" }
         ];
@@ -1251,7 +1252,7 @@
             <td>${item.customer}</td>
             <td><span class="tag">${item.category}</span></td>
             <td class="rating">${toRatingEmoji(item.rating)}</td>
-            <td><button class="btn btn-ghost" type="button" disabled>™ffnen</button></td>
+            <td><button class="btn btn-ghost" type="button" disabled>Öffnen</button></td>
           `;
           body.appendChild(tr);
         });
@@ -1453,8 +1454,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
