@@ -345,6 +345,8 @@
       background: var(--surface-panel);
       padding:14px;
       min-height: 170px;
+      max-height: 56vh;
+      overflow: auto;
       font-size: 13.5px;
       line-height: 1.55;
       white-space: pre-wrap;
@@ -355,6 +357,11 @@
     .panel:hover{
       background: linear-gradient(180deg, var(--surface-panel), var(--surface-panel-hover));
       border-color: var(--surface-panel-border-strong);
+    }
+    .card[aria-labelledby="card-output-title"] .card-b{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
     .refs-wrap{
       margin-top:12px;
@@ -397,6 +404,32 @@
       border-color: rgba(255,255,255,.18);
       color: rgba(255,255,255,.85);
     }
+    .refs-sharepoint{
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .refs-link{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      text-decoration:none;
+      color: rgba(255,255,255,.92);
+      font-weight:800;
+      transition: background .15s ease, border-color .15s ease, transform .08s ease;
+    }
+    .refs-link:hover{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.22);
+    }
+    .refs-link:active{ transform: translateY(1px); }
     .tooltip-bubble{
       position:absolute;
       z-index:1000;
@@ -495,6 +528,9 @@ var(--surface-panel), var(--surface-panel-hover));}
       .grid2{grid-template-columns:1fr}
       .pillbar{justify-content:flex-start}
     }
+    @media (max-width: 980px){
+      .panel{ max-height: 46vh; }
+    }
     @media (max-width: 420px){
       h1{font-size:18px}
       .btn{flex-basis:100%}
@@ -564,7 +600,7 @@ var(--surface-panel), var(--surface-panel-hover));}
 
               <div class="field">
                 <label for="email" data-tip-key="email">E-Mail <span class="tip-icon" tabindex="0" data-tip-key="email" aria-label="Hinweis zu E-Mail">i</span></label>
-                <input id="email" type="email" placeholder="name@bechtle.com" value="max.bechtle@bechtle.com" required aria-required="true" />
+                <input id="email" type="email" placeholder="max.bechtle@bechtle.com" required aria-required="true" />
                 <div id="emailError" class="field-error">
                   Bitte eine gültige Bechtle-E-Mail (@bechtle.com) eingeben.
                 </div>
@@ -647,6 +683,20 @@ var(--surface-panel), var(--surface-panel-hover));}
           <div class="refs-wrap" id="refsWrap" aria-label="Referenzen">
             <div class="refs-title">Referenzen</div>
             <div id="refsList" class="refs-list small">Keine Referenzen vorhanden.</div>
+            <div class="refs-sharepoint">
+              <div class="small" style="margin-bottom:6px; color: rgba(255,255,255,.75); font-weight:800;">
+                Referenzdokumente in SharePoint öffnen
+              </div>
+              <a
+                class="refs-link"
+                href="https://bemacon.sharepoint.com/sites/Sharepoint-presaleski-dev/Freigegebene%20Dokumente/Forms/AllItems.aspx?id=%2Fsites%2FSharepoint%2Dpresaleski%2Ddev%2FFreigegebene%20Dokumente%2FReferenzdokumente&viewid=00575f1c%2D9c60%2D486f%2D8bf3%2D7a29de9f11f0"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Referenzdokumente in SharePoint öffnen"
+              >
+                ↗ SharePoint: Referenzdokumente
+              </a>
+            </div>
           </div>
         </div>
 
@@ -1296,7 +1346,7 @@ var(--surface-panel), var(--surface-panel-hover));}
 
     $("resetBtn").addEventListener("click", () => {
       ["customer","responsiblePerson","primaryGoal","situation","scope","pt","detailDescription","notes","feedbackText"].forEach(id => $(id).value = "");
-      $("email").value = "max.bechtle@bechtle.com";
+      $("email").value = "";
       document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
       clearFieldError("responsiblePerson");
       panels.text.textContent = "Noch kein Angebot generiert.";

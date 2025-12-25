@@ -29,6 +29,50 @@ function toNumber(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+async function pingFlow(timeoutMs = 8000) {
+  if (!FLOW_URL) {
+    return { ok: false, error: "POWER_AUTOMATE_TRIGGER_URL fehlt" };
+  }
+
+  const headers = { "Content-Type": "application/json" };
+  if (FLOW_KEY) {
+    headers[FLOW_AUTH_HEADER || "x-flow-key"] = FLOW_KEY;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res;
+  let text = "";
+  let data = null;
+
+  try {
+    res = await fetch(FLOW_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ meta: { healthCheck: true } }),
+      signal: controller.signal
+    });
+
+    text = await res.text();
+    try { data = text ? JSON.parse(text) : null; } catch (_) { data = { raw: text }; }
+
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    if (!data && text) {
+      try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
+    }
+    return {
+      ok: false,
+      status: res?.status ?? null,
+      error: err?.message || String(err),
+      data
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 function mapToFlowSchema(body) {
   const looksLikeFlow =
     body &&
@@ -74,13 +118,16 @@ function extractTextFromRaw(raw) {
   return "";
 }
 
-app.get("/api/health", (_req, res) => {
+app.get("/api/health", async (_req, res) => {
+  const probe = await pingFlow();
   res.json({
-    ok: true,
-    api: "online (Power Automate)",
+    ok: probe.ok === true,
+    api: probe.ok ? "online (Power Automate)" : "offline (Power Automate)",
+    status: probe.status ?? null,
     configured: {
       powerAutomateTriggerUrl: Boolean(FLOW_URL)
-    }
+    },
+    error: probe.ok ? null : (probe.error || probe.data || null)
   });
 });
 
