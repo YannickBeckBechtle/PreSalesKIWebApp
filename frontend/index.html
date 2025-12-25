@@ -356,6 +356,47 @@
       background: linear-gradient(180deg, var(--surface-panel), var(--surface-panel-hover));
       border-color: var(--surface-panel-border-strong);
     }
+    .refs-wrap{
+      margin-top:12px;
+      border:1px solid var(--surface-panel-border);
+      background: var(--surface-panel);
+      border-radius: var(--radius);
+      padding:12px;
+    }
+    .refs-title{
+      font-weight:800;
+      margin:0 0 10px;
+      letter-spacing:.2px;
+    }
+    .refs-list{display:flex;flex-direction:column;gap:10px}
+    .refs-item{
+      border:1px solid var(--surface-panel-border);
+      border-left:3px solid var(--primary);
+      border-radius:12px;
+      padding:10px 12px;
+      background: rgba(255,255,255,.02);
+      transition: border-color .12s ease, background .12s ease;
+    }
+    .refs-item:hover{
+      border-color: var(--surface-panel-border-strong);
+      background: var(--surface-panel-hover);
+    }
+    .refs-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:6px;
+    }
+    .refs-id{font-weight:800;}
+    .refs-tags{display:flex;gap:8px;flex-wrap:wrap}
+    .refs-reason{color:var(--muted);font-size:12.5px;line-height:1.45}
+    .tag.tag-ghost{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.18);
+      color: rgba(255,255,255,.85);
+    }
     .tooltip-bubble{
       position:absolute;
       z-index:1000;
@@ -603,6 +644,10 @@ var(--surface-panel), var(--surface-panel-hover));}
           </div>
           <div class="panel" id="panel-text" role="tabpanel" aria-label="Text Panel">Noch kein Angebot generiert.</div>
           <div class="panel mono hidden" id="panel-json" role="tabpanel" aria-label="JSON Panel">{}</div>
+          <div class="refs-wrap" id="refsWrap" aria-label="Referenzen">
+            <div class="refs-title">Referenzen</div>
+            <div id="refsList" class="refs-list small">Keine Referenzen vorhanden.</div>
+          </div>
         </div>
 
         <div class="card-h">
@@ -704,6 +749,8 @@ var(--surface-panel), var(--surface-panel-hover));}
     const runDot = document.getElementById("runDot");
     const runProgressBar = document.getElementById("runProgressBar");
     const runProgressLabel = document.getElementById("runProgressLabel");
+    const refsWrap = document.getElementById("refsWrap");
+    const refsList = document.getElementById("refsList");
     const generateBtn = document.getElementById("generateBtn");
     const feedbackNotice = document.getElementById("feedbackNotice");
     const spinner = document.getElementById("spinner");
@@ -761,7 +808,8 @@ var(--surface-panel), var(--surface-panel-hover));}
       try { return JSON.stringify(data ?? {}, null, 2); } catch (_) { return String(data); }
     }
 
-    function offerJsonToText(anyData){
+    function offerJsonToText(anyData, options = {}){
+      const includeReferences = options.includeReferences === true;
       function tryParse(val){
         if(typeof val === "string"){
           try { return JSON.parse(val); } catch(_) { return null; }
@@ -871,7 +919,7 @@ var(--surface-panel), var(--surface-panel-hover));}
         lines.push("");
       }
 
-      if(refs.length){
+      if(includeReferences && refs.length){
         lines.push("Referenzen:");
         refs.forEach(r => {
           const cls = [r.primaerklasse, r.sekundaerklasse].filter(Boolean).join(" / ");
@@ -896,6 +944,105 @@ var(--surface-panel), var(--surface-panel-hover));}
       return lines.join("\n").trim();
     }
 
+    function extractReferences(run){
+      const tryParse = (val) => {
+        if(typeof val === "string"){
+          try{ return JSON.parse(val); }catch(_){ return null; }
+        }
+        return val;
+      };
+
+      const root = typeof run === "string" ? tryParse(run) : run;
+
+      const sources = [
+        root?.referenzen,
+        root?.references,
+        root?.referenzDokumente,
+        root?.raw?.referenzen,
+        root?.raw?.references,
+        root?.raw?.referenzDokumente,
+      ];
+
+      let list = [];
+      for(const src of sources){
+        const parsed = tryParse(src);
+        if(Array.isArray(parsed) && parsed.length){
+          list = parsed;
+          break;
+        }
+      }
+
+      if(!Array.isArray(list)) return [];
+
+      return list.map((entry) => {
+        let ref = entry;
+        if(typeof entry === "string"){
+          const parsed = tryParse(entry);
+          ref = parsed && typeof parsed === "object" ? parsed : { dokument_id: entry };
+        }
+        const id = ref?.dokument_id || ref?.document_id || ref?.id || ref?.doc_id || "";
+        const primary = ref?.primaerklasse || ref?.["primärklasse"] || ref?.primaryClass || ref?.primary_class || "";
+        const secondary = ref?.sekundaerklasse || ref?.["sekundärklasse"] || ref?.secondaryClass || ref?.secondary_class || "";
+        const reason = ref?.aehnlichkeitsgrund || ref?.["ähnlichkeitsgrund"] || ref?.reason || ref?.begruendung || ref?.match_reason || "";
+        return {
+          id: id || "-",
+          primary,
+          secondary,
+          reason
+        };
+      }).filter(r => r.id || r.primary || r.secondary || r.reason);
+    }
+
+    function renderReferences(run){
+      if(!refsList) return;
+      const refs = extractReferences(run);
+      refsList.innerHTML = "";
+
+      if(!refs || refs.length === 0){
+        refsList.textContent = "Keine Referenzen vorhanden.";
+        return;
+      }
+
+      refs.forEach(ref => {
+        const item = document.createElement("div");
+        item.className = "refs-item";
+
+        const head = document.createElement("div");
+        head.className = "refs-head";
+
+        const idEl = document.createElement("span");
+        idEl.className = "refs-id kbd";
+        idEl.textContent = ref.id || "-";
+
+        const tags = document.createElement("span");
+        tags.className = "refs-tags";
+        if(ref.primary){
+          const t = document.createElement("span");
+          t.className = "tag";
+          t.textContent = ref.primary;
+          tags.appendChild(t);
+        }
+        if(ref.secondary){
+          const t = document.createElement("span");
+          t.className = "tag tag-ghost";
+          t.textContent = ref.secondary;
+          tags.appendChild(t);
+        }
+
+        head.appendChild(idEl);
+        head.appendChild(tags);
+
+        const reasonEl = document.createElement("div");
+        reasonEl.className = "refs-reason";
+        reasonEl.textContent = ref.reason || "—";
+
+        item.appendChild(head);
+        item.appendChild(reasonEl);
+
+        refsList.appendChild(item);
+      });
+    }
+
     function renderRun(run){
       lastRun = run;
 
@@ -905,6 +1052,7 @@ var(--surface-panel), var(--surface-panel-hover));}
       const text = pretty || (typeof run?.text === "string" ? run.text : "");
       panels.text.textContent = text || "Keine Antwort erhalten.";
       panels.json.textContent = formatJsonPanel(run);
+      renderReferences(run);
     }
     function parsePtValue(raw){
       if(!raw) return null;
@@ -1094,8 +1242,11 @@ var(--surface-panel), var(--surface-panel-hover));}
       setRunTone("warn");
       setRunProgress(0, "Angebot wird generiert...");
       runIdEl.textContent = "local-" + Math.random().toString(16).slice(2, 8);
-      panels.text.textContent = "Bitte warten – Angebot wird generiert...";
+      panels.text.textContent = "Bitte warten – Angebot wird generiert …";
       panels.json.textContent = JSON.stringify({ status: "pending", startedAt: new Date().toISOString() }, null, 2);
+      if(refsList){
+        refsList.textContent = "Bitte warten – Referenzen werden geladen …";
+      }
       startFakeRunProgress();
 
       const payload = buildFlowPayloadFromUi();
@@ -1127,6 +1278,9 @@ var(--surface-panel), var(--surface-panel-hover));}
         };
         panels.text.textContent = "Request fehlgeschlagen: " + errorText;
         panels.json.textContent = formatJsonPanel(errorObj);
+        if(refsList){
+          refsList.textContent = "Keine Referenzen (Request fehlgeschlagen).";
+        }
       } finally {
         setLoading(false);
       }
@@ -1154,6 +1308,9 @@ var(--surface-panel), var(--surface-panel-hover));}
       stopFakeRunProgress();
       setRunTone(null);
       setRunProgress(0, "-");
+      if(refsList){
+        refsList.textContent = "Keine Referenzen vorhanden.";
+      }
     });
 
     $("saveFeedback").addEventListener("click", async () => {
