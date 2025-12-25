@@ -489,6 +489,17 @@ var(--surface-panel), var(--surface-panel-hover));}
       font-size: 13px;
     }
     .notice.show{display:block}
+    .notice.notice-email{
+      display:none;
+      margin: 10px 0 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(124,58,237,.35);
+      background: rgba(124,58,237,.12);
+      color: rgba(245,243,255,.98);
+      font-weight: 800;
+    }
+    .notice.notice-email.show{ display:block; }
 
     table{width:100%;border-collapse:collapse;font-size:13px}
     th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}
@@ -581,7 +592,6 @@ var(--surface-panel), var(--surface-panel-hover));}
             <h2 id="card-input-title">Eingabe / Angebotskontext</h2>
             <p>Strukturiere die Eingangsdaten, damit das Modell einen belastbaren Angebotsentwurf erzeugt.</p>
           </div>
-          <div class="small" title="Pflichtfelder zuerst">??</div>
         </div>
 
         <div class="card-b">
@@ -677,6 +687,9 @@ var(--surface-panel), var(--surface-panel-hover));}
           <div class="tabs" role="tablist">
             <button class="tab-btn active" data-tab="text" role="tab" aria-selected="true">Text</button>
             <button class="tab-btn" data-tab="json" role="tab" aria-selected="false">JSON</button>
+          </div>
+          <div id="emailNotice" class="notice notice-email" role="status" aria-live="polite">
+            📩 Angebotsdokument kommt per E-Mail – bitte ein paar Minuten gedulden.
           </div>
           <div class="panel" id="panel-text" role="tabpanel" aria-label="Text Panel">Noch kein Angebot generiert.</div>
           <div class="panel mono hidden" id="panel-json" role="tabpanel" aria-label="JSON Panel">{}</div>
@@ -801,6 +814,7 @@ var(--surface-panel), var(--surface-panel-hover));}
     const runProgressLabel = document.getElementById("runProgressLabel");
     const refsWrap = document.getElementById("refsWrap");
     const refsList = document.getElementById("refsList");
+    const emailNotice = document.getElementById("emailNotice");
     const generateBtn = document.getElementById("generateBtn");
     const feedbackNotice = document.getElementById("feedbackNotice");
     const spinner = document.getElementById("spinner");
@@ -1103,6 +1117,18 @@ var(--surface-panel), var(--surface-panel-hover));}
       panels.text.textContent = text || "Keine Antwort erhalten.";
       panels.json.textContent = formatJsonPanel(run);
       renderReferences(run);
+
+      const hasContent = Boolean(
+        (run && (run.status === "ok" || run.status === "completed")) ||
+        text
+      ) && !run?.error;
+      if(emailNotice){
+        if(hasContent){
+          emailNotice.classList.add("show");
+        }else{
+          emailNotice.classList.remove("show");
+        }
+      }
     }
     function parsePtValue(raw){
       if(!raw) return null;
@@ -1288,6 +1314,7 @@ var(--surface-panel), var(--surface-panel-hover));}
 
       setLoading(true);
       feedbackNotice.classList.remove("show");
+      if(emailNotice){ emailNotice.classList.remove("show"); }
       setApiStatus("läuft", "warn");
       setRunTone("warn");
       setRunProgress(0, "Angebot wird generiert...");
@@ -1361,6 +1388,7 @@ var(--surface-panel), var(--surface-panel-hover));}
       if(refsList){
         refsList.textContent = "Keine Referenzen vorhanden.";
       }
+      if(emailNotice){ emailNotice.classList.remove("show"); }
     });
 
     $("saveFeedback").addEventListener("click", async () => {
