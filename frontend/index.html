@@ -566,7 +566,7 @@ var(--surface-panel), var(--surface-panel-hover));}
       <div class="pillbar" aria-label="Statusleiste">
         <div class="pill" title="API-Status (aus /api/health)">
           <span class="dot" id="apiDot"></span>
-          <span>API: <span id="apiStatus">unbekannt</span></span>
+          <span>API: <span id="apiStatus">bereit</span></span>
         </div>
         <div class="pill pill-run" title="Letzter Lauf / Fortschritt">
           <span class="dot" id="runDot"></span>
@@ -1341,7 +1341,6 @@ var(--surface-panel), var(--surface-panel-hover));}
         setRunProgress(100, "Antwort empfangen");
         renderRun(run);
         setApiStatus("fertig", "ok");
-        checkHealth();
       }catch(err){
         stopFakeRunProgress();
         setRunTone("bad");
@@ -1683,8 +1682,6 @@ var(--surface-panel), var(--surface-panel-hover));}
       });
     })();
 
-    checkHealth();
-    loadHistory();
   </script>
 </body>
 </html>
